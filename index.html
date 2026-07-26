@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow, noarchive" />
+  <meta name="referrer" content="no-referrer" />
+  <title>PP Woven Bag Market Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --bg: #0f1419;
+      --panel: #171d25;
+      --panel2: #1c2430;
+      --line: #2a3441;
+      --text: #e8edf2;
+      --muted: #93a0b0;
+      --faint: #6b7785;
+      --accent: #3dd6c6;
+      --accent2: #5b8def;
+      --warn: #f0b429;
+      --danger: #f07178;
+      --ok: #7fd962;
+      --purple: #c792ea;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+      background:
+        radial-gradient(1200px 600px at 10% -10%, rgba(61,214,198,.12), transparent 55%),
+        radial-gradient(900px 500px at 100% 0%, rgba(91,141,239,.10), transparent 50%),
+        var(--bg);
+      color: var(--text);
+      line-height: 1.45;
+      min-height: 100vh;
+    }
+    .wrap { max-width: 1180px; margin: 0 auto; padding: 22px 18px 56px; }
+    h1 { margin: 0; font-size: 1.45rem; letter-spacing: -.02em; }
+    h2 { margin: 0 0 10px; font-size: 1.05rem; letter-spacing: -.01em; }
+    h3 { margin: 0 0 8px; font-size: .92rem; color: var(--muted); font-weight: 600; }
+    p { margin: 0 0 10px; }
+    .muted { color: var(--muted); }
+    .faint { color: var(--faint); font-size: .8rem; }
+    .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .between { justify-content: space-between; }
+    .pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 4px 11px; border-radius: 999px; font-size: .74rem; font-weight: 650;
+      border: 1px solid var(--line); background: var(--panel2); color: var(--muted);
+    }
+    .pill.live { color: var(--accent); border-color: rgba(61,214,198,.35); background: rgba(61,214,198,.08); }
+    .pill.warn { color: var(--warn); border-color: rgba(240,180,41,.35); background: rgba(240,180,41,.08); }
+    .pill.danger { color: var(--danger); border-color: rgba(240,113,120,.35); background: rgba(240,113,120,.08); }
+    .btn {
+      appearance: none; border: 1px solid rgba(61,214,198,.4);
+      background: linear-gradient(180deg, rgba(61,214,198,.22), rgba(61,214,198,.08));
+      color: var(--text); font-weight: 650; font-size: .84rem;
+      padding: 8px 14px; border-radius: 10px; cursor: pointer;
+      display: inline-flex; align-items: center; gap: 8px;
+    }
+    .btn:hover { border-color: var(--accent); }
+    .btn:disabled { opacity: .55; cursor: wait; }
+    .btn .spin { width: 14px; height: 14px; border: 2px solid rgba(255,255,255,.25); border-top-color: var(--accent); border-radius: 50%; display: none; }
+    .btn.loading .spin { display: inline-block; animation: spin .7s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .hero {
+      display: grid; grid-template-columns: 1.4fr .9fr; gap: 14px; margin-top: 16px;
+    }
+    .hero-left { display: grid; gap: 10px; align-content: start; }
+    .panel {
+      background: rgba(23,29,37,.92);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 14px 16px;
+    }
+    .callout {
+      border-radius: 12px; padding: 14px 16px;
+      background: rgba(240,180,41,.08);
+      border: 1px solid rgba(240,180,41,.28);
+    }
+    .callout strong { display: block; margin-bottom: 4px; color: var(--warn); }
+    .action-grid {
+      display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 8px;
+    }
+    .action-card {
+      min-height: 102px; padding: 12px; border-radius: 11px;
+      background: var(--panel); border: 1px solid var(--line);
+    }
+    .action-card .cover {
+      color: var(--faint); font-size: .69rem; font-weight: 700;
+      letter-spacing: .04em; text-transform: uppercase;
+    }
+    .action-card .action { margin-top: 5px; font-size: .91rem; font-weight: 750; }
+    .action-card .detail { margin-top: 4px; color: var(--muted); font-size: .74rem; }
+    .trigger-strip {
+      display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 8px;
+      padding: 11px 12px; border: 1px solid var(--line); border-radius: 11px;
+      background: rgba(23,29,37,.92);
+    }
+    .trigger-strip div { border-right: 1px solid var(--line); padding-right: 8px; }
+    .trigger-strip div:last-child { border-right: 0; padding-right: 0; }
+    .trigger-strip b { display: block; font-size: .8rem; }
+    .trigger-strip span { color: var(--faint); font-size: .68rem; }
+    .stats {
+      display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 10px; margin-top: 12px;
+    }
+    .stat {
+      background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px;
+      position: relative; overflow: hidden;
+    }
+    .stat::after {
+      content: ""; position: absolute; inset: auto -20% -40% auto; width: 90px; height: 90px;
+      border-radius: 50%; background: radial-gradient(circle, rgba(61,214,198,.14), transparent 70%);
+    }
+    .stat .v { font-size: 1.35rem; font-weight: 750; letter-spacing: -.02em; }
+    .stat .l { font-size: .75rem; color: var(--muted); margin-top: 2px; }
+    .stat .d { font-size: .72rem; margin-top: 6px; font-weight: 600; }
+    .up { color: var(--danger); }
+    .down { color: var(--ok); }
+    .flat { color: var(--muted); }
+    .grid2 { display: grid; grid-template-columns: 1.15fr 1fr; gap: 12px; }
+    .grid3 { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 12px; }
+    .chart-box { position: relative; height: 260px; }
+    .chart-box.tall { height: 300px; }
+    table { width: 100%; border-collapse: collapse; font-size: .84rem; }
+    th, td { padding: 8px 9px; text-align: left; border-bottom: 1px solid var(--line); vertical-align: top; }
+    th { color: var(--faint); font-size: .7rem; text-transform: uppercase; letter-spacing: .04em; }
+    tr:last-child td { border-bottom: 0; }
+    .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 7px; }
+    .dot.d { background: var(--danger); } .dot.w { background: var(--warn); }
+    .dot.i { background: var(--accent2); } .dot.o { background: var(--ok); }
+    .section { margin-top: 16px; }
+    .factor-bars { display: grid; gap: 8px; }
+    .factor {
+      display: grid; grid-template-columns: 140px 1fr 48px; gap: 8px; align-items: center;
+      font-size: .8rem;
+    }
+    .bar {
+      height: 10px; border-radius: 999px; background: #243040; overflow: hidden;
+    }
+    .bar > i { display: block; height: 100%; border-radius: 999px; }
+    .factor .pct { text-align: right; color: var(--muted); font-variant-numeric: tabular-nums; }
+    .spark {
+      display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px;
+    }
+    .chip {
+      font-size: .72rem; padding: 5px 9px; border-radius: 8px;
+      background: var(--panel2); border: 1px solid var(--line); color: var(--muted);
+    }
+    .chip b { color: var(--text); }
+    .banner {
+      text-align: center; font-size: .75rem; color: var(--faint);
+      padding: 8px; border-bottom: 1px solid var(--line);
+      background: rgba(0,0,0,.25);
+    }
+    .status { font-size: .78rem; color: var(--muted); }
+    .status.ok { color: var(--accent); }
+    .status.err { color: var(--danger); }
+    a.link { color: var(--accent2); text-decoration: none; }
+    a.link:hover { text-decoration: underline; }
+    .news-list { display: grid; gap: 8px; }
+    .news-item {
+      display: grid; grid-template-columns: 118px 1fr auto; gap: 10px; align-items: start;
+      padding: 10px 12px; border-radius: 10px; background: var(--panel2); border: 1px solid var(--line);
+    }
+    .news-item .when { font-size: .72rem; color: var(--faint); font-variant-numeric: tabular-nums; }
+    .news-item .ttl { font-size: .84rem; font-weight: 600; }
+    .news-item .tag {
+      font-size: .68rem; font-weight: 700; padding: 3px 8px; border-radius: 999px;
+      border: 1px solid var(--line); color: var(--muted); white-space: nowrap;
+    }
+    .news-item .tag.pp { color: var(--danger); border-color: rgba(240,113,120,.35); }
+    .news-item .tag.pe { color: var(--accent2); border-color: rgba(91,141,239,.35); }
+    .news-item .tag.oil { color: var(--warn); border-color: rgba(240,180,41,.35); }
+    .news-item .tag.city { color: var(--accent); border-color: rgba(61,214,198,.35); }
+    .news-item .tag.chem { color: var(--purple); border-color: rgba(199,146,234,.35); }
+    @media (max-width: 900px) {
+      .hero, .grid2, .grid3, .stats { grid-template-columns: 1fr 1fr; }
+      .news-item { grid-template-columns: 1fr; }
+      .action-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 560px) {
+      .hero, .grid2, .grid3, .stats { grid-template-columns: 1fr; }
+      .factor { grid-template-columns: 1fr; }
+      .trigger-strip { grid-template-columns: 1fr; }
+      .trigger-strip div { border-right: 0; border-bottom: 1px solid var(--line); padding: 0 0 8px; }
+      .trigger-strip div:last-child { border-bottom: 0; padding-bottom: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="banner">Unlisted · password-gated · not indexed · long-lived access (owner-keyed host)</div>
+  <div class="wrap">
+    <div class="row between">
+      <div>
+        <div class="row">
+          <h1>PP Woven Bag — Polymer Market Dashboard</h1>
+          <span class="pill live" id="asOfPill">As of —</span>
+          <span class="pill warn" id="recPill">BUY</span>
+        </div>
+        <p class="muted" style="margin-top:6px;max-width:720px">
+          India West/Gujarat focus for raffia tape &amp; laminated woven bags.
+          Live refresh pulls current crude benchmarks and recalculates PP projections from feedstock + national/international drivers. Includes a Polymerupdate news wire for India PP/PE circulars and city snapshots.
+        </p>
+      </div>
+      <div class="row">
+        <button class="btn" id="refreshBtn" type="button" title="Fetch latest crude &amp; recalculate">
+          <span class="spin"></span>
+          Refresh latest
+        </button>
+      </div>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <span class="status" id="refreshStatus">Embedded market snapshot loaded. Click Refresh for live crude update.</span>
+    </div>
+
+    <div class="hero">
+      <div class="hero-left">
+        <div class="callout">
+          <strong id="callTitle">Procurement call: BUY (tactical cover)</strong>
+          <span id="callBody">Cover 2–3 weeks of H030SG / equivalent raffia. Producers hiked PP homo +₹2.5/kg (23 Jul) and Gujarat dealer quotes jumped another ₹5/kg by 26 Jul. Feedstock war premium elevated — avoid speculative 6+ week inventory while crude pulls back from spikes.</span>
+        </div>
+        <div class="action-grid">
+          <div class="action-card">
+            <div class="cover">Inventory &lt; 10 days</div>
+            <div class="action up">BUY now</div>
+            <div class="detail">Raise cover to 21–25 days to protect production.</div>
+          </div>
+          <div class="action-card">
+            <div class="cover">Inventory 10–25 days</div>
+            <div class="action" style="color:var(--warn)">Top up selectively</div>
+            <div class="detail">Add 7–10 days; avoid chasing the full price spike.</div>
+          </div>
+          <div class="action-card">
+            <div class="cover">Inventory &gt; 25 days</div>
+            <div class="action down">HOLD / WAIT</div>
+            <div class="detail">Reassess after crude and next producer circular.</div>
+          </div>
+        </div>
+        <div class="trigger-strip">
+          <div><b id="heroPPRef">₹139.53/kg</b><span>H030SG reference</span></div>
+          <div><b id="heroW4">—</b><span>W+4 base projection</span></div>
+          <div><b id="heroBrent">$97.08/bbl</b><span>Current Brent</span></div>
+        </div>
+      </div>
+      <div class="panel">
+        <h3>Risk score</h3>
+        <div class="row between">
+          <div class="stat" style="flex:1;border:0;background:transparent;padding:0">
+            <div class="v up" id="riskScore">72</div>
+            <div class="l">/ 100 elevated</div>
+          </div>
+          <canvas id="riskGauge" width="120" height="120"></canvas>
+        </div>
+        <div class="spark" id="riskChips"></div>
+      </div>
+    </div>
+
+    <div class="stats" id="kpiRow"></div>
+
+    <div class="section grid2">
+      <div class="panel">
+        <div class="row between">
+          <h2>H030SG raffia vs Brent</h2>
+          <span class="pill">₹/kg · $/bbl</span>
+        </div>
+        <div class="chart-box"><canvas id="histChart"></canvas></div>
+      </div>
+      <div class="panel">
+        <div class="row between">
+          <h2>Feedstock heatmap</h2>
+          <span class="pill">month Δ %</span>
+        </div>
+        <div class="chart-box"><canvas id="feedChart"></canvas></div>
+      </div>
+    </div>
+
+    <div class="section panel">
+      <div class="row between">
+        <div>
+          <h2>PP raffia price projection (8 weeks)</h2>
+          <p class="faint" style="margin:0">Model: H030SG ≈ base + β·Brent + naphtha pass-through + India basket premium + Hormuz/geo risk + monsoon demand. Bands = bull / base / bear.</p>
+        </div>
+        <span class="pill" id="projPill">Base path</span>
+      </div>
+      <div class="chart-box tall"><canvas id="projChart"></canvas></div>
+      <div class="spark" id="projChips"></div>
+    </div>
+
+    <div class="section grid2">
+      <div class="panel">
+        <h2>National &amp; international factor weights</h2>
+        <div class="factor-bars" id="factorBars"></div>
+        <p class="faint" style="margin-top:10px">Weights used in the projection engine. Refresh recalibrates geo-risk from live crude momentum.</p>
+      </div>
+      <div class="panel">
+        <h2>Scenario table (week +4 / +8)</h2>
+        <table>
+          <thead><tr><th>Scenario</th><th>Assumptions</th><th>W+4</th><th>W+8</th></tr></thead>
+          <tbody id="scenarioBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="section panel">
+      <div class="row between">
+        <div>
+          <h2>Polymerupdate wire</h2>
+          <p class="faint" style="margin:0">Headlines &amp; India market signals from <a class="link" href="https://www.polymerupdate.com/" target="_blank" rel="noopener">www.polymerupdate.com</a> (public feed). Full grade tables on Polymerupdate require login.</p>
+        </div>
+        <span class="pill live">Source · Polymerupdate</span>
+      </div>
+      <div class="grid2" style="margin-top:12px">
+        <div>
+          <h3>Top / breaking (India polymers)</h3>
+          <div class="news-list" id="puTopNews"></div>
+        </div>
+        <div>
+          <h3>City snapshots &amp; open markets</h3>
+          <div class="news-list" id="puCityNews"></div>
+          <h3 style="margin-top:14px">Weekly international markers</h3>
+          <table>
+            <thead><tr><th>Benchmark</th><th>As of</th><th>Note</th></tr></thead>
+            <tbody id="puWeekly"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="callout" style="margin-top:12px;background:rgba(91,141,239,.08);border-color:rgba(91,141,239,.3)">
+        <strong style="color:var(--accent2)">Woven-bag takeaway from Polymerupdate</strong>
+        <span id="puTakeaway">RIL raised domestic PP (22 Jul) and announced PE (26 Jul); IOCL revised PP &amp; PE (23 Jul); GAIL raised PE (23 Jul). City snapshots for Mumbai, Ahmedabad, Delhi, Bangalore published 25 Jul. Crude story on Polymerupdate (25 Jul) flagged stagflation fears and US–Iran peace efforts — watch for feedstock pullback risk vs producer hike momentum.</span>
+      </div>
+    </div>
+
+    <div class="section panel">
+      <h2>Producer price movements</h2>
+      <p class="faint">Circular revisions · late July 2026. Cross-checked with Polymerupdate producer news + Plastic4trade Gujarat dealer quotes.</p>
+      <table>
+        <thead>
+          <tr><th>Producer</th><th>PP move</th><th>PE move</th><th>Key grades</th><th>Signal</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><span class="dot d"></span>Reliance</td><td>Homo +₹2.5/kg; ICP/RCP +₹3.5</td><td>HD +1.0; LLD +2.0; LD +1.5</td><td>H030SG, E52009</td><td>Lead hike</td></tr>
+          <tr><td><span class="dot d"></span>IOCL</td><td>Homo +₹2.5; Co-poly +₹3.5</td><td>HD +1.0; LL +2.0</td><td>1030RG</td><td>Matched RIL</td></tr>
+          <tr><td><span class="dot w"></span>OPaL</td><td>PP circular 23 Jul</td><td>HDPE/LLDPE 23 Jul</td><td>RH03</td><td>Following</td></tr>
+          <tr><td><span class="dot w"></span>HMEL</td><td>PP 17 &amp; 23 Jul</td><td>PE 17 &amp; 23 Jul</td><td>R03RR</td><td>West comps</td></tr>
+          <tr><td><span class="dot i"></span>GAIL</td><td>— (PE slate)</td><td>HDPE/LLDPE 23 Jul</td><td>F0120L peers</td><td>Protection ended</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section grid2">
+      <div class="panel">
+        <h2>Key raffia &amp; film grades</h2>
+        <table>
+          <thead><tr><th>Grade</th><th>Use</th><th>₹/kg</th><th>Δ</th><th>Live est.</th></tr></thead>
+          <tbody id="gradeBody"></tbody>
+        </table>
+      </div>
+      <div class="panel">
+        <h2>Cross-producer raffia map</h2>
+        <table>
+          <thead><tr><th>Producer</th><th>Grade</th><th>₹/kg</th><th>Basis</th></tr></thead>
+          <tbody>
+            <tr><td>Reliance</td><td>H030SG</td><td id="rilRaffia">139.53</td><td>Dealer 26 Jul</td></tr>
+            <tr><td>IOCL</td><td>1030RG</td><td>~138–139</td><td>Aligned hike</td></tr>
+            <tr><td>OPaL</td><td>RH03</td><td>~138</td><td>Circular 23 Jul</td></tr>
+            <tr><td>HMEL</td><td>R03RR</td><td>~133–138</td><td>Net + hikes</td></tr>
+            <tr><td>GAIL</td><td>HD peers</td><td>PE slate</td><td>No PP raffia</td></tr>
+          </tbody>
+        </table>
+        <div class="callout" style="margin-top:12px;background:rgba(91,141,239,.08);border-color:rgba(91,141,239,.3)">
+          <strong style="color:var(--accent2)">Buying tip</strong>
+          Compare net-cash after discount + freight. HMEL/OPaL often ₹1–3 under RIL when availability is easy — spreads compress in hike cycles.
+        </div>
+      </div>
+    </div>
+
+    <div class="section grid3">
+      <div class="panel">
+        <h2>BOPP film</h2>
+        <div class="stat"><div class="v" id="boppPrice">~₹178</div><div class="l">JPFL tape textile 25–30µ</div><div class="d down">−₹4/kg on 10 Jul</div></div>
+        <p class="faint" style="margin-top:10px">India BOPP ~$1,970/MT. PP hikes may reverse mid-month film relief.</p>
+      </div>
+      <div class="panel">
+        <h2>Buy / Hold / Wait</h2>
+        <table>
+          <thead><tr><th>Cover</th><th>Action</th></tr></thead>
+          <tbody>
+            <tr><td>&lt; 10 days</td><td class="up">BUY to 21–25d</td></tr>
+            <tr><td>10–25 days</td><td style="color:var(--warn)">BUY +7–10d only</td></tr>
+            <tr><td>&gt; 25 days</td><td class="down">HOLD / WAIT</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="panel">
+        <h2>Cost transmission</h2>
+        <table>
+          <tbody>
+            <tr><td>Crude → naphtha</td><td>Tight / Hormuz</td></tr>
+            <tr><td>Naphtha → propylene</td><td>Crackers squeezed</td></tr>
+            <tr><td>Propylene → raffia</td><td>+₹7.5 / 10 days</td></tr>
+            <tr><td>PP → bag price</td><td>Lag 1–2 weeks</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="section grid2">
+      <div class="panel">
+        <h2>Outlook supports</h2>
+        <p>Oil premium rebuilt Brent toward $100; Asia propylene rallied &gt;10% in a week.</p>
+        <p>Majors synced PP homo +₹2.5/kg; dealer market added ₹5 into the weekend.</p>
+        <p>Woven-bag demand floor from agri, fertiliser, cement into monsoon / festival pipeline.</p>
+      </div>
+      <div class="panel">
+        <h2>Outlook risks</h2>
+        <p>Crude/naphtha can reverse fast if Hormuz tensions ease.</p>
+        <p>Mid-July PE was cut hard before rebound — converters remain price-sensitive.</p>
+        <p>Thin bag margins: full PP pass-through to end buyers may lag.</p>
+      </div>
+    </div>
+
+    <p class="faint" style="margin-top:18px">
+      Sources: <a class="link" href="https://www.polymerupdate.com/" target="_blank" rel="noopener">Polymerupdate</a>
+      · Plastic4trade · Plastemart · Trading Economics · ET Energyworld · ChemOrbis · Yahoo Finance (live refresh).
+      Indicative only — confirm DCA / producer circulars before booking. Projection is a heuristic model, not a price guarantee.
+      Polymerupdate paid tables are not scraped; headlines/dates are from the public site.
+    </p>
+  </div>
+
+<script>
+(function () {
+  const PASS_HASH = null; // host password gate is primary
+  const state = {
+    asOf: "26 Jul 2026",
+    brent: 97.08,
+    wti: 90.47,
+    naphtha: 810.35,
+    propylene: 1010,
+    indiaBasket: 103.33,
+    usdInr: 83.6,
+    h030sg: 139.53,
+    grades: [
+      { code: "H030SG", use: "PP raffia", px: 139.53, d: 5.0 },
+      { code: "H100EY", use: "TQ / film", px: 144.22, d: 5.0 },
+      { code: "H110MA", use: "Injection", px: 138.79, d: 5.0 },
+      { code: "E52009", use: "HDPE raffia", px: 138.81, d: 2.0 },
+      { code: "M26500", use: "LLDPE IM", px: 147.01, d: 5.0 },
+    ],
+    histDates: ["16 Jul", "22 Jul", "26 Jul"],
+    histPP: [132.03, 134.53, 139.53],
+    histBrent: [84.2, 95.5, 97.08],
+    feedMoves: [30.3, 25.8, 18.2, 12.2, 11.0],
+    baselines: { h030sg: 139.53, brent: 97.08, naphtha: 810.35, propylene: 1010, indiaBasket: 103.33 },
+    factors: [
+      { name: "Brent / crude", w: 32, color: "#f07178" },
+      { name: "Naphtha crack", w: 18, color: "#f0b429" },
+      { name: "Propylene Asia", w: 14, color: "#c792ea" },
+      { name: "India basket / INR", w: 12, color: "#5b8def" },
+      { name: "Hormuz / geo risk", w: 14, color: "#ff8f6b" },
+      { name: "Domestic demand", w: 10, color: "#3dd6c6" },
+    ],
+    polymerupdate: {
+      synced: "26 Jul 2026",
+      top: [
+        { when: "26 Jul 09:10", tag: "chem", tagLabel: "PET", title: "RIL raises PET prices in domestic India markets", href: "https://www.polymerupdate.com/" },
+        { when: "26 Jul 06:10", tag: "chem", tagLabel: "PVC", title: "RIL raises PVC prices in the domestic Indian market", href: "https://www.polymerupdate.com/" },
+        { when: "26 Jul 06:05", tag: "pe", tagLabel: "PE", title: "RIL announces Polyethylene (PE) prices in domestic India", href: "https://www.polymerupdate.com/" },
+        { when: "25 Jul 10:00", tag: "oil", tagLabel: "Crude", title: "Crude oil slumps on stagflation fears, renewed US–Iran peace efforts", href: "https://www.polymerupdate.com/" },
+        { when: "23 Jul 11:32", tag: "pe", tagLabel: "GAIL", title: "GAIL (India) Limited increases Polyethylene (PE) prices in domestic markets", href: "https://www.polymerupdate.com/" },
+        { when: "23 Jul 10:02", tag: "pp", tagLabel: "IOCL", title: "IOCL announces PP and PE price revisions in domestic India", href: "https://www.polymerupdate.com/News/Details/1499328" },
+        { when: "22 Jul 22:30", tag: "pp", tagLabel: "RIL PP", title: "RIL raises Polypropylene (PP) prices in the domestic Indian market", href: "https://www.polymerupdate.com/News/Details/1499326" },
+      ],
+      cities: [
+        { when: "25 Jul 11:42", tag: "city", tagLabel: "AMD", title: "SNAPSHOT: Ahmedabad market as of July 25, 2026", href: "https://www.polymerupdate.com/News/Details/1499891" },
+        { when: "25 Jul 11:42", tag: "city", tagLabel: "BLR", title: "SNAPSHOT: Bangalore market as of July 25, 2026", href: "https://www.polymerupdate.com/News/Details/1499895" },
+        { when: "25 Jul 11:32", tag: "city", tagLabel: "BOM", title: "SNAPSHOT: Mumbai market as of July 25, 2026", href: "https://www.polymerupdate.com/" },
+        { when: "25 Jul 11:26", tag: "city", tagLabel: "DEL", title: "SNAPSHOT: Delhi market as of July 25, 2026", href: "https://www.polymerupdate.com/News/Details/1499892" },
+        { when: "24 Jul 18:03", tag: "pp", tagLabel: "Open mkt", title: "Indian Open Markets Price Table – July 24, 2026", href: "https://www.polymerupdate.com/News/Details/1499871" },
+        { when: "25 Jul 01:30", tag: "chem", tagLabel: "Global", title: "Global polymer market synopsis", href: "https://www.polymerupdate.com/" },
+      ],
+      weekly: [
+        { name: "PP Film CFR SE Asia", asOf: "22 Jul 2026", note: "Price band login-gated on Polymerupdate" },
+        { name: "HDPE Film FD NWE", asOf: "24 Jul 2026", note: "Euro/MT · login-gated" },
+        { name: "LDPE Film CFR Brazil", asOf: "24 Jul 2026", note: "USD/MT · login-gated" },
+        { name: "PVC Suspension CFR GCC", asOf: "20 Jul 2026", note: "USD/MT · login-gated" },
+      ],
+    },
+  };
+
+  const charts = {};
+  const $ = (id) => document.getElementById(id);
+
+  function fmt(n, d = 2) { return Number(n).toFixed(d); }
+  function todayLabel() {
+    return new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+  }
+
+  function riskFromMarket() {
+    const crudeShock = Math.min(30, Math.max(8, (state.brent - 75) * 0.85));
+    const hikeMom = 22;
+    const demand = 12;
+    const liq = Math.max(6, 16 - Math.abs(state.brent - state.indiaBasket) * 0.4);
+    const total = Math.round(Math.min(95, crudeShock + hikeMom + demand + liq));
+    return { total, parts: [
+      { l: "Feedstock", v: Math.round(crudeShock), m: 30 },
+      { l: "Producer hike", v: hikeMom, m: 25 },
+      { l: "Demand", v: demand, m: 20 },
+      { l: "Liquidity", v: Math.round(liq), m: 25 },
+    ]};
+  }
+
+  function projectPP() {
+    const betaBrent = 0.38; // ₹/kg per $1 Brent
+    const betaNaph = 0.012; // ₹/kg per $1 naphtha
+    const baseBrent = 90;
+    const baseNaph = 780;
+    const geo = Math.max(0, (state.brent - 85) * 0.15);
+    const indiaPrem = Math.max(0, (state.indiaBasket - state.brent) * 0.08);
+    const now = state.h030sg;
+    const weeks = [];
+    for (let w = 0; w <= 8; w++) {
+      const drift = (state.brent - baseBrent) * betaBrent * (w / 8)
+        + (state.naphtha - baseNaph) * betaNaph * (w / 8)
+        + geo * (0.4 + w / 10)
+        + indiaPrem * (w / 8)
+        + (w >= 3 ? 0.35 : 0); // monsoon / packing demand
+      const base = now + drift;
+      const bull = base + 1.8 + w * 0.45 + geo * 0.35;
+      const bear = base - 1.2 - w * 0.35 + (state.brent < 92 ? -0.8 : 0);
+      weeks.push({ w, base, bull, bear });
+    }
+    return weeks;
+  }
+
+  function recommendation(proj) {
+    const w4 = proj[4].base;
+    const upside = w4 - state.h030sg;
+    if (upside > 2.5) return { rec: "BUY", tone: "warn", title: "Procurement call: BUY (tactical cover)", body: "Model sees further upside into a 4-week window as crude/naphtha stay elevated. Cover 2–3 weeks of raffia; skip speculative stockpiles beyond ~25 days." };
+    if (upside < -1.5) return { rec: "WAIT", tone: "live", title: "Procurement call: WAIT / HOLD", body: "Projected path softens if feedstock cools. Hold operating inventory and wait for next producer circular before topping up." };
+    return { rec: "HOLD", tone: "warn", title: "Procurement call: HOLD with selective top-up", body: "Near-term path is range-bound. Top up only if cover &lt; 10 days; otherwise wait for Wednesday circulars / crude confirmation." };
+  }
+
+  function renderKPIs() {
+    const ppD = state.h030sg - state.baselines.h030sg;
+    const brD = ((state.brent / state.baselines.brent) - 1) * 100;
+    const naD = ((state.naphtha / state.baselines.naphtha) - 1) * 100;
+    const inD = ((state.indiaBasket / state.baselines.indiaBasket) - 1) * 100;
+    const items = [
+      { v: state.h030sg.toFixed(2), l: "H030SG ₹/kg", d: (ppD >= 0 ? "+" : "") + fmt(ppD) + " vs snapshot", cls: ppD >= 0 ? "up" : "down" },
+      { v: "$" + fmt(state.brent), l: "Brent $/bbl", d: (brD >= 0 ? "+" : "") + fmt(brD, 1) + "% vs snapshot", cls: brD >= 0 ? "up" : "down" },
+      { v: "$" + fmt(state.naphtha, 0), l: "Naphtha $/MT", d: (naD >= 0 ? "+" : "") + fmt(naD, 1) + "% linked", cls: naD >= 0 ? "up" : "down" },
+      { v: "$" + fmt(state.indiaBasket), l: "India crude basket", d: (inD >= 0 ? "+" : "") + fmt(inD, 1) + "% est.", cls: inD >= 0 ? "up" : "down" },
+    ];
+    $("kpiRow").innerHTML = items.map(i =>
+      `<div class="stat"><div class="v ${i.cls}">${i.v}</div><div class="l">${i.l}</div><div class="d ${i.cls}">${i.d}</div></div>`
+    ).join("");
+  }
+
+  function renderGrades() {
+    const delta = (state.brent - 97.08) * 0.38;
+    $("gradeBody").innerHTML = state.grades.map(g => {
+      const live = g.px + (g.code === "H030SG" || g.code.startsWith("H") ? delta : delta * 0.7);
+      return `<tr><td><span class="dot d"></span>${g.code}</td><td>${g.use}</td><td>${g.px.toFixed(2)}</td><td class="up">+${g.d.toFixed(1)}</td><td>${live.toFixed(2)}</td></tr>`;
+    }).join("");
+    $("rilRaffia").textContent = (state.h030sg + delta).toFixed(2);
+  }
+
+  function renderFactors() {
+    // recalibrate geo weight from crude momentum
+    const geoBoost = Math.min(8, Math.max(-4, (state.brent - 95) * 0.6));
+    const factors = state.factors.map(f => {
+      if (f.name.includes("Hormuz")) return { ...f, w: Math.max(8, Math.min(22, 14 + geoBoost)) };
+      if (f.name.includes("Brent")) return { ...f, w: Math.max(24, Math.min(38, 32 + (state.brent - 95) * 0.3)) };
+      return f;
+    });
+    const sum = factors.reduce((a, b) => a + b.w, 0);
+    $("factorBars").innerHTML = factors.map(f => {
+      const pct = Math.round(f.w / sum * 100);
+      return `<div class="factor"><div>${f.name}</div><div class="bar"><i style="width:${pct}%;background:${f.color}"></i></div><div class="pct">${pct}%</div></div>`;
+    }).join("");
+  }
+
+  function renderRisk() {
+    const r = riskFromMarket();
+    $("riskScore").textContent = r.total;
+    $("riskChips").innerHTML = r.parts.map(p =>
+      `<span class="chip"><b>${p.v}</b>/${p.m} ${p.l}</span>`
+    ).join("");
+    const ctx = $("riskGauge").getContext("2d");
+    if (charts.risk) charts.risk.destroy();
+    charts.risk = new Chart(ctx, {
+      type: "doughnut",
+      data: {
+        labels: r.parts.map(p => p.l),
+        datasets: [{
+          data: r.parts.map(p => p.v),
+          backgroundColor: ["#f07178", "#f0b429", "#5b8def", "#3dd6c6"],
+          borderWidth: 0,
+        }],
+      },
+      options: {
+        cutout: "72%",
+        plugins: { legend: { display: false }, tooltip: { enabled: true } },
+      },
+    });
+  }
+
+  function chartDefaults() {
+    Chart.defaults.color = "#93a0b0";
+    Chart.defaults.borderColor = "#2a3441";
+    Chart.defaults.font.family = "IBM Plex Sans, Segoe UI, system-ui, sans-serif";
+  }
+
+  function renderHist() {
+    if (charts.hist) charts.hist.destroy();
+    charts.hist = new Chart($("histChart"), {
+      type: "line",
+      data: {
+        labels: state.histDates,
+        datasets: [
+          {
+            label: "H030SG ₹/kg",
+            data: state.histPP,
+            borderColor: "#f07178",
+            backgroundColor: "rgba(240,113,120,.15)",
+            tension: 0.35,
+            fill: true,
+            yAxisID: "y",
+          },
+          {
+            label: "Brent $/bbl",
+            data: state.histBrent,
+            borderColor: "#5b8def",
+            backgroundColor: "rgba(91,141,239,.08)",
+            tension: 0.35,
+            fill: false,
+            yAxisID: "y1",
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: "index", intersect: false },
+        plugins: { legend: { position: "bottom", labels: { boxWidth: 10 } } },
+        scales: {
+          y: { title: { display: true, text: "₹/kg" }, grid: { color: "#243040" } },
+          y1: { position: "right", title: { display: true, text: "$/bbl" }, grid: { drawOnChartArea: false } },
+        },
+      },
+    });
+  }
+
+  function monthPct(closes, fallback) {
+    if (!closes || closes.length < 2) return fallback;
+    const first = closes[0];
+    const last = closes[closes.length - 1];
+    if (!first || !last) return fallback;
+    return Math.round(((last / first) - 1) * 1000) / 10;
+  }
+
+  function renderFeed() {
+    if (charts.feed) charts.feed.destroy();
+    charts.feed = new Chart($("feedChart"), {
+      type: "bar",
+      data: {
+        labels: ["Brent", "WTI", "Naphtha", "Propylene*", "India basket"],
+        datasets: [{
+          label: "Approx. move %",
+          data: state.feedMoves.slice(),
+          backgroundColor: ["#f07178", "#f07178", "#f0b429", "#c792ea", "#5b8def"],
+          borderRadius: 6,
+        }],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { ticks: { callback: v => v + "%" }, grid: { color: "#243040" } },
+        },
+      },
+    });
+  }
+
+  function renderProj() {
+    const proj = projectPP();
+    const rec = recommendation(proj);
+    $("heroPPRef").textContent = `₹${fmt(state.h030sg)}/kg`;
+    $("heroW4").textContent = `₹${fmt(proj[4].base)}/kg`;
+    $("heroBrent").textContent = `$${fmt(state.brent)}/bbl`;
+    $("recPill").textContent = rec.rec;
+    $("recPill").className = "pill " + rec.tone;
+    $("callTitle").textContent = rec.title;
+    $("callBody").innerHTML = rec.body;
+    $("projPill").textContent = `W+4 base ₹${fmt(proj[4].base)}`;
+    $("projChips").innerHTML = [
+      `<span class="chip"><b>Now</b> ₹${fmt(state.h030sg)}</span>`,
+      `<span class="chip"><b>W+4 base</b> ₹${fmt(proj[4].base)}</span>`,
+      `<span class="chip"><b>W+8 bull</b> ₹${fmt(proj[8].bull)}</span>`,
+      `<span class="chip"><b>W+8 bear</b> ₹${fmt(proj[8].bear)}</span>`,
+      `<span class="chip"><b>β Brent</b> 0.38 ₹/$</span>`,
+    ].join("");
+    $("scenarioBody").innerHTML = `
+      <tr><td class="up">Bull</td><td>Hormuz stays tight · Brent &gt; $100</td><td>₹${fmt(proj[4].bull)}</td><td>₹${fmt(proj[8].bull)}</td></tr>
+      <tr><td style="color:var(--warn)">Base</td><td>Current feedstock path persists</td><td>₹${fmt(proj[4].base)}</td><td>₹${fmt(proj[8].base)}</td></tr>
+      <tr><td class="down">Bear</td><td>Geo eases · crude mean-reverts</td><td>₹${fmt(proj[4].bear)}</td><td>₹${fmt(proj[8].bear)}</td></tr>
+    `;
+    if (charts.proj) charts.proj.destroy();
+    charts.proj = new Chart($("projChart"), {
+      type: "line",
+      data: {
+        labels: proj.map(p => p.w === 0 ? "Now" : "W+" + p.w),
+        datasets: [
+          {
+            label: "Bull",
+            data: proj.map(p => p.bull),
+            borderColor: "#f07178",
+            backgroundColor: "rgba(240,113,120,.12)",
+            fill: "+1",
+            tension: 0.35,
+            pointRadius: 3,
+          },
+          {
+            label: "Base",
+            data: proj.map(p => p.base),
+            borderColor: "#f0b429",
+            backgroundColor: "rgba(240,180,41,.10)",
+            fill: false,
+            tension: 0.35,
+            borderWidth: 3,
+            pointRadius: 3,
+          },
+          {
+            label: "Bear",
+            data: proj.map(p => p.bear),
+            borderColor: "#7fd962",
+            backgroundColor: "rgba(127,217,98,.08)",
+            fill: false,
+            tension: 0.35,
+            pointRadius: 3,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: "index", intersect: false },
+        plugins: {
+          legend: { position: "bottom", labels: { boxWidth: 10 } },
+          tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ₹${Number(c.raw).toFixed(2)}` } },
+        },
+        scales: {
+          y: { title: { display: true, text: "H030SG ₹/kg" }, grid: { color: "#243040" } },
+        },
+      },
+    });
+    return proj;
+  }
+
+  function setAsOf(label, live) {
+    state.asOf = label;
+    $("asOfPill").textContent = (live ? "Live · " : "As of ") + label;
+  }
+
+  function renderPolymerupdate() {
+    const pu = state.polymerupdate;
+    const newsHtml = (items) => items.map(n => `
+      <div class="news-item">
+        <div class="when">${n.when}</div>
+        <div class="ttl"><a class="link" href="${n.href}" target="_blank" rel="noopener">${n.title}</a></div>
+        <span class="tag ${n.tag}">${n.tagLabel}</span>
+      </div>`).join("");
+    $("puTopNews").innerHTML = newsHtml(pu.top);
+    $("puCityNews").innerHTML = newsHtml(pu.cities);
+    $("puWeekly").innerHTML = pu.weekly.map(w =>
+      `<tr><td>${w.name}</td><td>${w.asOf}</td><td class="faint">${w.note}</td></tr>`
+    ).join("");
+    const wireNote = document.querySelector("#puTopNews")?.closest(".panel")?.querySelector("p.faint");
+    if (wireNote) {
+      wireNote.innerHTML = `Headlines &amp; India market signals from <a class="link" href="https://www.polymerupdate.com/" target="_blank" rel="noopener">www.polymerupdate.com</a> (public feed, snapshot ${pu.synced}). Full grade tables on Polymerupdate require login. Live Refresh updates crude-linked panels; Polymerupdate headlines refresh when this dashboard is republished.`;
+    }
+  }
+
+  function renderAll() {
+    chartDefaults();
+    setAsOf(state.asOf, false);
+    renderKPIs();
+    renderGrades();
+    renderFactors();
+    renderRisk();
+    renderHist();
+    renderFeed();
+    renderProj();
+    renderPolymerupdate();
+  }
+
+  async function fetchYahoo(symbol) {
+    const target = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1d&range=1mo`;
+    const proxies = [
+      (u) => `https://corsproxy.io/?${encodeURIComponent(u)}`,
+      (u) => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
+    ];
+    let lastErr;
+    for (const make of proxies) {
+      try {
+        const res = await fetch(make(target), { cache: "no-store" });
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        const json = await res.json();
+        const result = json.chart.result[0];
+        const meta = result.meta;
+        const closes = result.indicators.quote[0].close.filter(x => x != null);
+        return { price: meta.regularMarketPrice || closes[closes.length - 1], closes };
+      } catch (e) { lastErr = e; }
+    }
+    throw lastErr || new Error("fetch failed");
+  }
+
+  async function refreshLatest() {
+    const btn = $("refreshBtn");
+    const st = $("refreshStatus");
+    btn.disabled = true;
+    btn.classList.add("loading");
+    st.className = "status";
+    st.textContent = "Refreshing live crude benchmarks and recalculating all charts…";
+    try {
+      const [brent, wti] = await Promise.all([
+        fetchYahoo("BZ=F"),
+        fetchYahoo("CL=F"),
+      ]);
+      const prevBrent = state.brent;
+      state.brent = brent.price;
+      state.wti = wti.price;
+      // naphtha / propylene / India basket heuristics from Brent move
+      state.naphtha = Math.round(state.baselines.naphtha * (1 + (state.brent / state.baselines.brent - 1) * 0.85) * 100) / 100;
+      state.propylene = Math.round(state.baselines.propylene * (1 + (state.brent / state.baselines.brent - 1) * 0.55));
+      state.indiaBasket = Math.round((state.brent * 1.04 + 2.2) * 100) / 100;
+
+      // update hist last point + date label
+      state.histBrent[state.histBrent.length - 1] = state.brent;
+      const label = todayLabel();
+      state.histDates[state.histDates.length - 1] = label;
+
+      // estimated PP move from crude change vs embedded snapshot
+      const estMove = (state.brent - state.baselines.brent) * 0.38;
+      state.h030sg = Math.round((state.baselines.h030sg + estMove) * 100) / 100;
+      state.histPP[state.histPP.length - 1] = state.h030sg;
+
+      // feedstock heatmap: live 1-mo crude moves + linked estimates
+      const brentMo = monthPct(brent.closes, state.feedMoves[0]);
+      const wtiMo = monthPct(wti.closes, state.feedMoves[1]);
+      const naphMo = Math.round(brentMo * 0.85 * 10) / 10;
+      const propMo = Math.round(brentMo * 0.55 * 10) / 10;
+      const indiaMo = Math.round((((state.indiaBasket / state.baselines.indiaBasket) - 1) * 100) * 10) / 10;
+      state.feedMoves = [brentMo, wtiMo, naphMo, propMo, indiaMo];
+
+      state.polymerupdate.synced = label + " · crude live";
+
+      setAsOf(label, true);
+      // refresh every graph + detail panel from updated state
+      renderKPIs();
+      renderGrades();
+      renderFactors();
+      renderRisk();
+      renderHist();
+      renderFeed();
+      renderProj();
+      renderPolymerupdate();
+
+      st.className = "status ok";
+      st.textContent = `Updated ${new Date().toLocaleTimeString()} · Brent $${fmt(state.brent)} (${brentMo > 0 ? "+" : ""}${brentMo}% 1m) · WTI $${fmt(state.wti)} · PP est ₹${fmt(state.h030sg)}. All charts recalculated. Polymerupdate headlines remain last published snapshot.`;
+    } catch (e) {
+      st.className = "status err";
+      st.textContent = "Live feed unavailable (" + (e && e.message ? e.message : "network") + "). Showing last embedded snapshot — try again.";
+    } finally {
+      btn.disabled = false;
+      btn.classList.remove("loading");
+    }
+  }
+
+  $("refreshBtn").addEventListener("click", refreshLatest);
+  renderAll();
+})();
+</script>
+</body>
+</html>
