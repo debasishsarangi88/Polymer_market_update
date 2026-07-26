@@ -40,8 +40,18 @@ def main() -> None:
     parser.add_argument("--ttl-days", type=int, default=3650)
     args = parser.parse_args()
 
+    market_path = ROOT / "data" / "market.json"
+    html = DASHBOARD.read_text()
+    if market_path.exists():
+        import re
+        market_json = market_path.read_text().strip()
+        block = '<script type="application/json" id="embedded-market">\n' + market_json + '\n</script>\n'
+        if 'id="embedded-market"' in html:
+            html = re.sub(r'<script type="application/json" id="embedded-market">[\s\S]*?</script>\n?', block, html, count=1)
+        else:
+            html = html.replace('<script>\n(function () {', block + '<script>\n(function () {', 1)
     payload = {
-        "html": DASHBOARD.read_text(),
+        "html": html,
         "title": "PP Woven Bag — Polymer Market Dashboard",
         "ttl_days": args.ttl_days,
         "password": args.password,

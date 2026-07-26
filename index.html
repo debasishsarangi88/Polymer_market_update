@@ -67,7 +67,7 @@
     .hero {
       display: grid; grid-template-columns: 1.4fr .9fr; gap: 14px; margin-top: 16px;
     }
-    .hero-left { display: grid; gap: 10px; align-content: start; }
+    .hero-left { display: grid; gap: 10px; align-content: stretch; height: 100%; }
     .panel {
       background: rgba(23,29,37,.92);
       border: 1px solid var(--line);
@@ -78,8 +78,30 @@
       border-radius: 12px; padding: 14px 16px;
       background: rgba(240,180,41,.08);
       border: 1px solid rgba(240,180,41,.28);
+      display: grid;
+      grid-template-columns: 1.35fr 1fr;
+      gap: 14px;
+      align-items: stretch;
+      min-height: 132px;
     }
-    .callout strong { display: block; margin-bottom: 4px; color: var(--warn); }
+    .callout strong { display: block; margin-bottom: 6px; color: var(--warn); }
+    .callout-main { display: flex; flex-direction: column; gap: 6px; }
+    .call-side {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+      border-left: 1px solid rgba(240,180,41,.25); padding-left: 14px;
+    }
+    .call-metric {
+      background: rgba(15,20,25,.35); border: 1px solid rgba(240,180,41,.18);
+      border-radius: 10px; padding: 10px;
+    }
+    .call-metric .k {
+      font-size: .68rem; color: var(--faint); text-transform: uppercase;
+      letter-spacing: .04em; font-weight: 700;
+    }
+    .call-metric .v {
+      margin-top: 4px; font-size: .92rem; font-weight: 750; color: var(--text);
+    }
+    .call-metric .s { margin-top: 2px; font-size: .72rem; color: var(--muted); }
     .action-grid {
       display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 8px;
     }
@@ -179,6 +201,8 @@
       .hero, .grid2, .grid3, .stats { grid-template-columns: 1fr 1fr; }
       .news-item { grid-template-columns: 1fr; }
       .action-grid { grid-template-columns: 1fr; }
+      .callout { grid-template-columns: 1fr; min-height: 0; }
+      .call-side { border-left: 0; padding-left: 0; border-top: 1px solid rgba(240,180,41,.25); padding-top: 12px; }
     }
     @media (max-width: 560px) {
       .hero, .grid2, .grid3, .stats { grid-template-columns: 1fr; }
@@ -219,8 +243,32 @@
     <div class="hero">
       <div class="hero-left">
         <div class="callout">
-          <strong id="callTitle">Procurement call: BUY (tactical cover)</strong>
-          <span id="callBody">Cover 2–3 weeks of H030SG / equivalent raffia. Producers hiked PP homo +₹2.5/kg (23 Jul) and Gujarat dealer quotes jumped another ₹5/kg by 26 Jul. Feedstock war premium elevated — avoid speculative 6+ week inventory while crude pulls back from spikes.</span>
+          <div class="callout-main">
+            <strong id="callTitle">Procurement call: BUY (tactical cover)</strong>
+            <span id="callBody">Cover 2–3 weeks of H030SG / equivalent raffia. Producers hiked PP homo +₹2.5/kg (23 Jul) and Gujarat dealer quotes jumped another ₹5/kg by 26 Jul. Feedstock war premium elevated — avoid speculative 6+ week inventory while crude pulls back from spikes.</span>
+          </div>
+          <div class="call-side">
+            <div class="call-metric">
+              <div class="k">Stance</div>
+              <div class="v" id="callStance">BUY</div>
+              <div class="s" id="callStanceSub">Tactical 2–3 wk cover</div>
+            </div>
+            <div class="call-metric">
+              <div class="k">Risk band</div>
+              <div class="v" id="callRiskBand">Elevated</div>
+              <div class="s" id="callRiskSub">Watch Hormuz / crude</div>
+            </div>
+            <div class="call-metric">
+              <div class="k">W+4 target</div>
+              <div class="v" id="callW4">—</div>
+              <div class="s">Base projection</div>
+            </div>
+            <div class="call-metric">
+              <div class="k">Next check</div>
+              <div class="v" id="callNext">Wed circulars</div>
+              <div class="s" id="callNextSub">Producer + DCA</div>
+            </div>
+          </div>
         </div>
         <div class="action-grid">
           <div class="action-card">
@@ -430,6 +478,236 @@
     </p>
   </div>
 
+<script type="application/json" id="embedded-market">
+{
+  "asOf": "26 Jul 2026",
+  "updatedAt": "2026-07-26T17:38:19.832393Z",
+  "source": "github-actions-daily",
+  "brent": 96.78,
+  "wti": 89.31,
+  "naphtha": 808.22,
+  "propylene": 1008,
+  "indiaBasket": 102.85,
+  "usdInr": 83.6,
+  "h030sg": 139.42,
+  "grades": [
+    {
+      "code": "H030SG",
+      "use": "PP raffia",
+      "px": 139.42,
+      "d": 5.0
+    },
+    {
+      "code": "H100EY",
+      "use": "TQ / film",
+      "px": 144.2,
+      "d": 5.0
+    },
+    {
+      "code": "H110MA",
+      "use": "Injection",
+      "px": 138.77,
+      "d": 5.0
+    },
+    {
+      "code": "E52009",
+      "use": "HDPE raffia",
+      "px": 138.81,
+      "d": 2.0
+    },
+    {
+      "code": "M26500",
+      "use": "LLDPE IM",
+      "px": 147.01,
+      "d": 5.0
+    }
+  ],
+  "histDates": [
+    "16 Jul",
+    "22 Jul",
+    "26 Jul",
+    "26 Jul 2026"
+  ],
+  "histPP": [
+    132.03,
+    134.53,
+    139.53,
+    139.42
+  ],
+  "histBrent": [
+    84.2,
+    95.5,
+    97.08,
+    96.78
+  ],
+  "feedMoves": [
+    34.4,
+    29.0,
+    29.2,
+    18.9,
+    -0.5
+  ],
+  "baselines": {
+    "h030sg": 139.53,
+    "brent": 97.08,
+    "naphtha": 810.35,
+    "propylene": 1010,
+    "indiaBasket": 103.33
+  },
+  "factors": [
+    {
+      "name": "Brent / crude",
+      "w": 32,
+      "color": "#f07178"
+    },
+    {
+      "name": "Naphtha crack",
+      "w": 18,
+      "color": "#f0b429"
+    },
+    {
+      "name": "Propylene Asia",
+      "w": 14,
+      "color": "#c792ea"
+    },
+    {
+      "name": "India basket / INR",
+      "w": 12,
+      "color": "#5b8def"
+    },
+    {
+      "name": "Hormuz / geo risk",
+      "w": 14,
+      "color": "#ff8f6b"
+    },
+    {
+      "name": "Domestic demand",
+      "w": 10,
+      "color": "#3dd6c6"
+    }
+  ],
+  "polymerupdate": {
+    "synced": "26 Jul 2026 \u00b7 daily Actions refresh (headlines last curated snapshot)",
+    "top": [
+      {
+        "when": "26 Jul 09:10",
+        "tag": "chem",
+        "tagLabel": "PET",
+        "title": "RIL raises PET prices in domestic India markets",
+        "href": "https://www.polymerupdate.com/"
+      },
+      {
+        "when": "26 Jul 06:10",
+        "tag": "chem",
+        "tagLabel": "PVC",
+        "title": "RIL raises PVC prices in the domestic Indian market",
+        "href": "https://www.polymerupdate.com/"
+      },
+      {
+        "when": "26 Jul 06:05",
+        "tag": "pe",
+        "tagLabel": "PE",
+        "title": "RIL announces Polyethylene (PE) prices in domestic India",
+        "href": "https://www.polymerupdate.com/"
+      },
+      {
+        "when": "25 Jul 10:00",
+        "tag": "oil",
+        "tagLabel": "Crude",
+        "title": "Crude oil slumps on stagflation fears, renewed US\u2013Iran peace efforts",
+        "href": "https://www.polymerupdate.com/"
+      },
+      {
+        "when": "23 Jul 11:32",
+        "tag": "pe",
+        "tagLabel": "GAIL",
+        "title": "GAIL (India) Limited increases Polyethylene (PE) prices in domestic markets",
+        "href": "https://www.polymerupdate.com/"
+      },
+      {
+        "when": "23 Jul 10:02",
+        "tag": "pp",
+        "tagLabel": "IOCL",
+        "title": "IOCL announces PP and PE price revisions in domestic India",
+        "href": "https://www.polymerupdate.com/News/Details/1499328"
+      },
+      {
+        "when": "22 Jul 22:30",
+        "tag": "pp",
+        "tagLabel": "RIL PP",
+        "title": "RIL raises Polypropylene (PP) prices in the domestic Indian market",
+        "href": "https://www.polymerupdate.com/News/Details/1499326"
+      }
+    ],
+    "cities": [
+      {
+        "when": "25 Jul 11:42",
+        "tag": "city",
+        "tagLabel": "AMD",
+        "title": "SNAPSHOT: Ahmedabad market as of July 25, 2026",
+        "href": "https://www.polymerupdate.com/News/Details/1499891"
+      },
+      {
+        "when": "25 Jul 11:42",
+        "tag": "city",
+        "tagLabel": "BLR",
+        "title": "SNAPSHOT: Bangalore market as of July 25, 2026",
+        "href": "https://www.polymerupdate.com/News/Details/1499895"
+      },
+      {
+        "when": "25 Jul 11:32",
+        "tag": "city",
+        "tagLabel": "BOM",
+        "title": "SNAPSHOT: Mumbai market as of July 25, 2026",
+        "href": "https://www.polymerupdate.com/"
+      },
+      {
+        "when": "25 Jul 11:26",
+        "tag": "city",
+        "tagLabel": "DEL",
+        "title": "SNAPSHOT: Delhi market as of July 25, 2026",
+        "href": "https://www.polymerupdate.com/News/Details/1499892"
+      },
+      {
+        "when": "24 Jul 18:03",
+        "tag": "pp",
+        "tagLabel": "Open mkt",
+        "title": "Indian Open Markets Price Table \u2013 July 24, 2026",
+        "href": "https://www.polymerupdate.com/News/Details/1499871"
+      },
+      {
+        "when": "25 Jul 01:30",
+        "tag": "chem",
+        "tagLabel": "Global",
+        "title": "Global polymer market synopsis",
+        "href": "https://www.polymerupdate.com/"
+      }
+    ],
+    "weekly": [
+      {
+        "name": "PP Film CFR SE Asia",
+        "asOf": "22 Jul 2026",
+        "note": "Price band login-gated on Polymerupdate"
+      },
+      {
+        "name": "HDPE Film FD NWE",
+        "asOf": "24 Jul 2026",
+        "note": "Euro/MT \u00b7 login-gated"
+      },
+      {
+        "name": "LDPE Film CFR Brazil",
+        "asOf": "24 Jul 2026",
+        "note": "USD/MT \u00b7 login-gated"
+      },
+      {
+        "name": "PVC Suspension CFR GCC",
+        "asOf": "20 Jul 2026",
+        "note": "USD/MT \u00b7 login-gated"
+      }
+    ]
+  }
+}
+</script>
 <script>
 (function () {
   const MARKET_URL = "data/market.json";
@@ -524,16 +802,147 @@
   }
 
   async function loadMarketSnapshot() {
+    // 1) same-origin / relative file (GitHub Pages)
     try {
       const res = await fetch(MARKET_URL + "?t=" + Date.now(), { cache: "no-store" });
-      if (!res.ok) throw new Error("HTTP " + res.status);
-      const data = await res.json();
-      applySnapshot(data);
-      return true;
-    } catch (e) {
-      return false;
+      if (res.ok) {
+        applySnapshot(await res.json());
+        return { ok: true, via: "market.json" };
+      }
+    } catch (_) { /* fall through */ }
+
+    // 2) embedded JSON (htmldrop / offline single-file hosts)
+    const embedded = document.getElementById("embedded-market");
+    if (embedded && embedded.textContent.trim()) {
+      try {
+        applySnapshot(JSON.parse(embedded.textContent));
+        return { ok: true, via: "embedded" };
+      } catch (_) { /* fall through */ }
     }
+    return { ok: false, via: "fallback-state" };
   }
+
+  function withTimeout(promise, ms, label) {
+    return Promise.race([
+      promise,
+      new Promise((_, reject) => setTimeout(() => reject(new Error(label || "timeout")), ms)),
+    ]);
+  }
+
+  async function fetchJson(url) {
+    const res = await fetch(url, { cache: "no-store", mode: "cors" });
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    return res.json();
+  }
+
+  async function fetchYahoo(symbol) {
+    const target = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1d&range=1mo`;
+    const attempts = [
+      () => fetchJson(target), // may work in some environments
+      () => fetchJson(`https://corsproxy.io/?${encodeURIComponent(target)}`),
+      () => fetchJson(`https://api.allorigins.win/get?url=${encodeURIComponent(target)}`).then((j) => JSON.parse(j.contents)),
+      () => fetchJson(`https://api.allorigins.win/raw?url=${encodeURIComponent(target)}`),
+    ];
+    let lastErr;
+    for (const attempt of attempts) {
+      try {
+        const json = await withTimeout(attempt(), 8000, "Load failed");
+        const result = json.chart.result[0];
+        const meta = result.meta;
+        const closes = result.indicators.quote[0].close.filter((x) => x != null);
+        return { price: meta.regularMarketPrice || closes[closes.length - 1], closes };
+      } catch (e) {
+        lastErr = e;
+      }
+    }
+    throw lastErr || new Error("Load failed");
+  }
+
+  function applyLiveCrude(brent, wti) {
+    state.brent = brent.price;
+    state.wti = wti.price;
+    state.naphtha = Math.round(state.baselines.naphtha * (1 + (state.brent / state.baselines.brent - 1) * 0.85) * 100) / 100;
+    state.propylene = Math.round(state.baselines.propylene * (1 + (state.brent / state.baselines.brent - 1) * 0.55));
+    state.indiaBasket = Math.round((state.brent * 1.04 + 2.2) * 100) / 100;
+
+    state.histBrent[state.histBrent.length - 1] = state.brent;
+    const label = todayLabel();
+    state.histDates[state.histDates.length - 1] = label;
+
+    const estMove = (state.brent - state.baselines.brent) * 0.38;
+    state.h030sg = Math.round((state.baselines.h030sg + estMove) * 100) / 100;
+    state.histPP[state.histPP.length - 1] = state.h030sg;
+
+    const brentMo = monthPct(brent.closes, state.feedMoves[0]);
+    const wtiMo = monthPct(wti.closes, state.feedMoves[1]);
+    state.feedMoves = [
+      brentMo,
+      wtiMo,
+      Math.round(brentMo * 0.85 * 10) / 10,
+      Math.round(brentMo * 0.55 * 10) / 10,
+      Math.round((((state.indiaBasket / state.baselines.indiaBasket) - 1) * 100) * 10) / 10,
+    ];
+    if (state.polymerupdate) {
+      state.polymerupdate.synced = label + " · live crude overlay";
+    }
+    return { label, brentMo };
+  }
+
+  async function refreshLatest() {
+    const btn = $("refreshBtn");
+    const st = $("refreshStatus");
+    btn.disabled = true;
+    btn.classList.add("loading");
+    st.className = "status";
+    st.textContent = "Refreshing snapshot and charts…";
+
+    const snap = await loadMarketSnapshot();
+    let live = null;
+    let liveErr = null;
+    try {
+      const [brent, wti] = await Promise.all([
+        fetchYahoo("BZ=F"),
+        fetchYahoo("CL=F"),
+      ]);
+      live = applyLiveCrude(brent, wti);
+    } catch (e) {
+      liveErr = e && e.message ? e.message : "network";
+    }
+
+    // Always re-render — refresh must not hard-fail when snapshot/embedded data exists
+    const label = live ? live.label : (state.asOf || todayLabel());
+    setAsOf(label, !!live);
+    renderKPIs();
+    renderGrades();
+    renderFactors();
+    renderRisk();
+    renderHist();
+    renderFeed();
+    renderProj();
+    renderPolymerupdate();
+    updateDailyPill();
+
+    if (live) {
+      st.className = "status ok";
+      st.textContent = `Updated ${new Date().toLocaleTimeString()} · ${snap.via} + live crude · Brent $${fmt(state.brent)} (${live.brentMo >= 0 ? "+" : ""}${live.brentMo}% 1m) · PP est ₹${fmt(state.h030sg)}. All charts recalculated.`;
+    } else {
+      st.className = "status ok";
+      st.textContent = `Updated ${new Date().toLocaleTimeString()} · ${snap.via} · Brent $${fmt(state.brent)} · PP ₹${fmt(state.h030sg)}. Charts refreshed from daily snapshot (live crude blocked: ${liveErr}).`;
+    }
+
+    btn.disabled = false;
+    btn.classList.remove("loading");
+  }
+
+  async function boot() {
+    const snap = await loadMarketSnapshot();
+    updateDailyPill();
+    renderAll();
+    $("refreshStatus").className = "status";
+    $("refreshStatus").textContent = `Snapshot ready (${snap.via}). Running refresh…`;
+    await refreshLatest();
+  }
+
 
   function riskFromMarket() {
     const crudeShock = Math.min(30, Math.max(8, (state.brent - 75) * 0.85));
@@ -575,9 +984,36 @@
   function recommendation(proj) {
     const w4 = proj[4].base;
     const upside = w4 - state.h030sg;
-    if (upside > 2.5) return { rec: "BUY", tone: "warn", title: "Procurement call: BUY (tactical cover)", body: "Model sees further upside into a 4-week window as crude/naphtha stay elevated. Cover 2–3 weeks of raffia; skip speculative stockpiles beyond ~25 days." };
-    if (upside < -1.5) return { rec: "WAIT", tone: "live", title: "Procurement call: WAIT / HOLD", body: "Projected path softens if feedstock cools. Hold operating inventory and wait for next producer circular before topping up." };
-    return { rec: "HOLD", tone: "warn", title: "Procurement call: HOLD with selective top-up", body: "Near-term path is range-bound. Top up only if cover &lt; 10 days; otherwise wait for Wednesday circulars / crude confirmation." };
+    if (upside > 2.5) return {
+      rec: "BUY", tone: "warn",
+      title: "Procurement call: BUY (tactical cover)",
+      body: "Model sees further upside into a 4-week window as crude/naphtha stay elevated. Cover 2–3 weeks of raffia; skip speculative stockpiles beyond ~25 days.",
+      stanceSub: "Tactical 2–3 wk cover",
+      riskBand: "Elevated",
+      riskSub: "Upside bias · size carefully",
+      next: "Wed circulars",
+      nextSub: "Confirm DCA nets",
+    };
+    if (upside < -1.5) return {
+      rec: "WAIT", tone: "live",
+      title: "Procurement call: WAIT / HOLD",
+      body: "Projected path softens if feedstock cools. Hold operating inventory and wait for next producer circular before topping up.",
+      stanceSub: "Defer non-urgent buys",
+      riskBand: "Cooling",
+      riskSub: "Feedstock may ease",
+      next: "48h crude",
+      nextSub: "Then producer lists",
+    };
+    return {
+      rec: "HOLD", tone: "warn",
+      title: "Procurement call: HOLD with selective top-up",
+      body: "Near-term path is range-bound. Top up only if cover &lt; 10 days; otherwise wait for Wednesday circulars / crude confirmation.",
+      stanceSub: "Selective top-up only",
+      riskBand: "Balanced",
+      riskSub: "Range-bound path",
+      next: "Wed circulars",
+      nextSub: "Producer + DCA",
+    };
   }
 
   function renderKPIs() {
@@ -733,6 +1169,13 @@
     $("recPill").className = "pill " + rec.tone;
     $("callTitle").textContent = rec.title;
     $("callBody").innerHTML = rec.body;
+    $("callStance").textContent = rec.rec;
+    $("callStanceSub").textContent = rec.stanceSub;
+    $("callRiskBand").textContent = rec.riskBand;
+    $("callRiskSub").textContent = rec.riskSub;
+    $("callW4").textContent = `₹${fmt(proj[4].base)}`;
+    $("callNext").textContent = rec.next;
+    $("callNextSub").textContent = rec.nextSub;
     $("projPill").textContent = `W+4 base ₹${fmt(proj[4].base)}`;
     $("projChips").innerHTML = [
       `<span class="chip"><b>Now</b> ₹${fmt(state.h030sg)}</span>`,
@@ -834,103 +1277,6 @@
     renderProj();
     renderPolymerupdate();
     updateDailyPill();
-  }
-
-  async function fetchYahoo(symbol) {
-    const target = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1d&range=1mo`;
-    const proxies = [
-      (u) => `https://corsproxy.io/?${encodeURIComponent(u)}`,
-      (u) => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
-    ];
-    let lastErr;
-    for (const make of proxies) {
-      try {
-        const res = await fetch(make(target), { cache: "no-store" });
-        if (!res.ok) throw new Error("HTTP " + res.status);
-        const json = await res.json();
-        const result = json.chart.result[0];
-        const meta = result.meta;
-        const closes = result.indicators.quote[0].close.filter(x => x != null);
-        return { price: meta.regularMarketPrice || closes[closes.length - 1], closes };
-      } catch (e) { lastErr = e; }
-    }
-    throw lastErr || new Error("fetch failed");
-  }
-
-  async function refreshLatest() {
-    const btn = $("refreshBtn");
-    const st = $("refreshStatus");
-    btn.disabled = true;
-    btn.classList.add("loading");
-    st.className = "status";
-    st.textContent = "Reloading daily snapshot and live crude…";
-    try {
-      const loaded = await loadMarketSnapshot();
-      updateDailyPill();
-
-      const [brent, wti] = await Promise.all([
-        fetchYahoo("BZ=F"),
-        fetchYahoo("CL=F"),
-      ]);
-      state.brent = brent.price;
-      state.wti = wti.price;
-      state.naphtha = Math.round(state.baselines.naphtha * (1 + (state.brent / state.baselines.brent - 1) * 0.85) * 100) / 100;
-      state.propylene = Math.round(state.baselines.propylene * (1 + (state.brent / state.baselines.brent - 1) * 0.55));
-      state.indiaBasket = Math.round((state.brent * 1.04 + 2.2) * 100) / 100;
-
-      state.histBrent[state.histBrent.length - 1] = state.brent;
-      const label = todayLabel();
-      state.histDates[state.histDates.length - 1] = label;
-
-      const estMove = (state.brent - state.baselines.brent) * 0.38;
-      state.h030sg = Math.round((state.baselines.h030sg + estMove) * 100) / 100;
-      state.histPP[state.histPP.length - 1] = state.h030sg;
-
-      const brentMo = monthPct(brent.closes, state.feedMoves[0]);
-      const wtiMo = monthPct(wti.closes, state.feedMoves[1]);
-      const naphMo = Math.round(brentMo * 0.85 * 10) / 10;
-      const propMo = Math.round(brentMo * 0.55 * 10) / 10;
-      const indiaMo = Math.round((((state.indiaBasket / state.baselines.indiaBasket) - 1) * 100) * 10) / 10;
-      state.feedMoves = [brentMo, wtiMo, naphMo, propMo, indiaMo];
-
-      if (state.polymerupdate) {
-        state.polymerupdate.synced = label + " · live overlay on daily snapshot";
-      }
-
-      setAsOf(label, true);
-      renderKPIs();
-      renderGrades();
-      renderFactors();
-      renderRisk();
-      renderHist();
-      renderFeed();
-      renderProj();
-      renderPolymerupdate();
-      updateDailyPill();
-
-      st.className = "status ok";
-      st.textContent = `Updated ${new Date().toLocaleTimeString()} · snapshot ${loaded ? "loaded" : "fallback"} · Brent $${fmt(state.brent)} (${brentMo > 0 ? "+" : ""}${brentMo}% 1m) · PP est ₹${fmt(state.h030sg)}. All charts recalculated.`;
-    } catch (e) {
-      st.className = "status err";
-      st.textContent = "Live feed unavailable (" + (e && e.message ? e.message : "network") + "). Showing last snapshot — try again.";
-      renderAll();
-      updateDailyPill();
-    } finally {
-      btn.disabled = false;
-      btn.classList.remove("loading");
-    }
-  }
-
-  async function boot() {
-    const loaded = await loadMarketSnapshot();
-    updateDailyPill();
-    renderAll();
-    $("refreshStatus").className = "status";
-    $("refreshStatus").textContent = loaded
-      ? `Daily snapshot loaded (${state.asOf}). Auto-refreshing live crude…`
-      : "Snapshot file unavailable — using embedded fallback. Click Refresh to try live crude.";
-    // Auto-refresh once on open so GitHub Pages always shows latest live crude on top of daily file
-    await refreshLatest();
   }
 
   $("refreshBtn").addEventListener("click", refreshLatest);
