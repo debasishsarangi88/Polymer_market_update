@@ -1,0 +1,36 @@
+name: Daily market refresh
+
+# Rebuilds data/market.json every day so GitHub Pages serves a fresh snapshot.
+# Runs at 00:30 UTC (~06:00 IST). Also runnable manually from the Actions tab.
+on:
+  schedule:
+    - cron: "30 0 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: daily-market-refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Update daily market snapshot
+        run: python3 scripts/update_market_daily.py
+
+      - name: Commit and push snapshot
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: daily market snapshot refresh"
+          file_pattern: data/market.json
+          commit_user_name: github-actions[bot]
+          commit_user_email: github-actions[bot]@users.noreply.github.com

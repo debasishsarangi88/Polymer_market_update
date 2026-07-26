@@ -43,21 +43,30 @@ use the htmldrop fallback below.
 
 ## Refresh behaviour
 
-The **Refresh latest** button in the dashboard fetches live Brent and WTI quotes
-client-side (via public CORS proxies) and recalculates every chart and panel:
-KPI tiles, risk score, factor weights, the price/Brent history chart, the
-feedstock heatmap, and the 8-week projection with its scenario table.
+Two layers keep the GitHub Pages site current:
 
-Two things it does **not** do:
+1. **Daily GitHub Action** (`.github/workflows/daily-refresh.yml`) runs every day at
+   **00:30 UTC (~06:00 IST)**. It updates [`data/market.json`](data/market.json)
+   with live Brent/WTI, recalculated naphtha/propylene/India-basket estimates,
+   and an updated H030SG path, then commits. The existing Pages deploy workflow
+   republishes automatically so the **same URL** serves the new snapshot.
 
-- Polymerupdate headlines are a published snapshot. Their price tables are
-  behind a login, so the wire updates when you edit `index.html` and redeploy.
-- Producer circular prices (Reliance, IOCL, OPaL, HMEL, GAIL) are point-in-time
-  values that need manual confirmation against your DCA circular.
+2. **Refresh latest button** (and auto-run on page open) reloads `data/market.json`
+   and overlays live crude quotes, then recalculates every chart and panel:
+   KPI tiles, risk score, factor weights, history chart, feedstock heatmap, and
+   the 8-week projection.
 
-To refresh the underlying snapshot data, edit the `state` object near the bottom
-of `index.html` (`grades`, `histPP`, `histBrent`, `baselines`, `polymerupdate`),
-commit, and push. Pages redeploys and the same URL serves the new version.
+Manual trigger: **Actions → Daily market refresh → Run workflow**.
+
+Local test:
+
+```bash
+python3 scripts/update_market_daily.py
+```
+
+Polymerupdate headlines remain a curated snapshot inside `data/market.json`
+(their price tables are login-gated). Update those fields in the JSON when you
+want new headlines, then push.
 
 ## htmldrop fallback (password-gated link)
 

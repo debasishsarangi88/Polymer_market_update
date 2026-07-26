@@ -1,0 +1,228 @@
+{
+  "asOf": "26 Jul 2026",
+  "updatedAt": "2026-07-26T17:38:19.832393Z",
+  "source": "github-actions-daily",
+  "brent": 96.78,
+  "wti": 89.31,
+  "naphtha": 808.22,
+  "propylene": 1008,
+  "indiaBasket": 102.85,
+  "usdInr": 83.6,
+  "h030sg": 139.42,
+  "grades": [
+    {
+      "code": "H030SG",
+      "use": "PP raffia",
+      "px": 139.42,
+      "d": 5.0
+    },
+    {
+      "code": "H100EY",
+      "use": "TQ / film",
+      "px": 144.2,
+      "d": 5.0
+    },
+    {
+      "code": "H110MA",
+      "use": "Injection",
+      "px": 138.77,
+      "d": 5.0
+    },
+    {
+      "code": "E52009",
+      "use": "HDPE raffia",
+      "px": 138.81,
+      "d": 2.0
+    },
+    {
+      "code": "M26500",
+      "use": "LLDPE IM",
+      "px": 147.01,
+      "d": 5.0
+    }
+  ],
+  "histDates": [
+    "16 Jul",
+    "22 Jul",
+    "26 Jul",
+    "26 Jul 2026"
+  ],
+  "histPP": [
+    132.03,
+    134.53,
+    139.53,
+    139.42
+  ],
+  "histBrent": [
+    84.2,
+    95.5,
+    97.08,
+    96.78
+  ],
+  "feedMoves": [
+    34.4,
+    29.0,
+    29.2,
+    18.9,
+    -0.5
+  ],
+  "baselines": {
+    "h030sg": 139.53,
+    "brent": 97.08,
+    "naphtha": 810.35,
+    "propylene": 1010,
+    "indiaBasket": 103.33
+  },
+  "factors": [
+    {
+      "name": "Brent / crude",
+      "w": 32,
+      "color": "#f07178"
+    },
+    {
+      "name": "Naphtha crack",
+      "w": 18,
+      "color": "#f0b429"
+    },
+    {
+      "name": "Propylene Asia",
+      "w": 14,
+      "color": "#c792ea"
+    },
+    {
+      "name": "India basket / INR",
+      "w": 12,
+      "color": "#5b8def"
+    },
+    {
+      "name": "Hormuz / geo risk",
+      "w": 14,
+      "color": "#ff8f6b"
+    },
+    {
+      "name": "Domestic demand",
+      "w": 10,
+      "color": "#3dd6c6"
+    }
+  ],
+  "polymerupdate": {
+    "synced": "26 Jul 2026 \u00b7 daily Actions refresh (headlines last curated snapshot)",
+    "top": [
+      {
+        "when": "26 Jul 09:10",
+        "tag": "chem",
+        "tagLabel": "PET",
+        "title": "RIL raises PET prices in domestic India markets",
+        "href": "https://www.polymerupdate.com/"
+      },
+      {
+        "when": "26 Jul 06:10",
+        "tag": "chem",
+        "tagLabel": "PVC",
+        "title": "RIL raises PVC prices in the domestic Indian market",
+        "href": "https://www.polymerupdate.com/"
+      },
+      {
+        "when": "26 Jul 06:05",
+        "tag": "pe",
+        "tagLabel": "PE",
+        "title": "RIL announces Polyethylene (PE) prices in domestic India",
+        "href": "https://www.polymerupdate.com/"
+      },
+      {
+        "when": "25 Jul 10:00",
+        "tag": "oil",
+        "tagLabel": "Crude",
+        "title": "Crude oil slumps on stagflation fears, renewed US\u2013Iran peace efforts",
+        "href": "https://www.polymerupdate.com/"
+      },
+      {
+        "when": "23 Jul 11:32",
+        "tag": "pe",
+        "tagLabel": "GAIL",
+        "title": "GAIL (India) Limited increases Polyethylene (PE) prices in domestic markets",
+        "href": "https://www.polymerupdate.com/"
+      },
+      {
+        "when": "23 Jul 10:02",
+        "tag": "pp",
+        "tagLabel": "IOCL",
+        "title": "IOCL announces PP and PE price revisions in domestic India",
+        "href": "https://www.polymerupdate.com/News/Details/1499328"
+      },
+      {
+        "when": "22 Jul 22:30",
+        "tag": "pp",
+        "tagLabel": "RIL PP",
+        "title": "RIL raises Polypropylene (PP) prices in the domestic Indian market",
+        "href": "https://www.polymerupdate.com/News/Details/1499326"
+      }
+    ],
+    "cities": [
+      {
+        "when": "25 Jul 11:42",
+        "tag": "city",
+        "tagLabel": "AMD",
+        "title": "SNAPSHOT: Ahmedabad market as of July 25, 2026",
+        "href": "https://www.polymerupdate.com/News/Details/1499891"
+      },
+      {
+        "when": "25 Jul 11:42",
+        "tag": "city",
+        "tagLabel": "BLR",
+        "title": "SNAPSHOT: Bangalore market as of July 25, 2026",
+        "href": "https://www.polymerupdate.com/News/Details/1499895"
+      },
+      {
+        "when": "25 Jul 11:32",
+        "tag": "city",
+        "tagLabel": "BOM",
+        "title": "SNAPSHOT: Mumbai market as of July 25, 2026",
+        "href": "https://www.polymerupdate.com/"
+      },
+      {
+        "when": "25 Jul 11:26",
+        "tag": "city",
+        "tagLabel": "DEL",
+        "title": "SNAPSHOT: Delhi market as of July 25, 2026",
+        "href": "https://www.polymerupdate.com/News/Details/1499892"
+      },
+      {
+        "when": "24 Jul 18:03",
+        "tag": "pp",
+        "tagLabel": "Open mkt",
+        "title": "Indian Open Markets Price Table \u2013 July 24, 2026",
+        "href": "https://www.polymerupdate.com/News/Details/1499871"
+      },
+      {
+        "when": "25 Jul 01:30",
+        "tag": "chem",
+        "tagLabel": "Global",
+        "title": "Global polymer market synopsis",
+        "href": "https://www.polymerupdate.com/"
+      }
+    ],
+    "weekly": [
+      {
+        "name": "PP Film CFR SE Asia",
+        "asOf": "22 Jul 2026",
+        "note": "Price band login-gated on Polymerupdate"
+      },
+      {
+        "name": "HDPE Film FD NWE",
+        "asOf": "24 Jul 2026",
+        "note": "Euro/MT \u00b7 login-gated"
+      },
+      {
+        "name": "LDPE Film CFR Brazil",
+        "asOf": "24 Jul 2026",
+        "note": "USD/MT \u00b7 login-gated"
+      },
+      {
+        "name": "PVC Suspension CFR GCC",
+        "asOf": "20 Jul 2026",
+        "note": "USD/MT \u00b7 login-gated"
+      }
+    ]
+  }
+}

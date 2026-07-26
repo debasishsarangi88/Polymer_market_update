@@ -205,14 +205,15 @@
         </p>
       </div>
       <div class="row">
-        <button class="btn" id="refreshBtn" type="button" title="Fetch latest crude &amp; recalculate">
+        <button class="btn" id="refreshBtn" type="button" title="Reload daily snapshot + live crude and recalculate all charts">
           <span class="spin"></span>
           Refresh latest
         </button>
       </div>
     </div>
     <div class="row" style="margin-top:8px">
-      <span class="status" id="refreshStatus">Embedded market snapshot loaded. Click Refresh for live crude update.</span>
+      <span class="pill" id="dailyPill">Daily snapshot · loading</span>
+      <span class="status" id="refreshStatus">Loading market snapshot…</span>
     </div>
 
     <div class="hero">
@@ -431,9 +432,11 @@
 
 <script>
 (function () {
-  const PASS_HASH = null; // host password gate is primary
+  const MARKET_URL = "data/market.json";
   const state = {
     asOf: "26 Jul 2026",
+    updatedAt: null,
+    source: "embedded-fallback",
     brent: 97.08,
     wti: 90.47,
     naphtha: 810.35,
@@ -495,6 +498,41 @@
   function fmt(n, d = 2) { return Number(n).toFixed(d); }
   function todayLabel() {
     return new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+  }
+
+  function applySnapshot(data) {
+    if (!data || typeof data !== "object") return;
+    const keys = [
+      "asOf", "updatedAt", "source", "brent", "wti", "naphtha", "propylene",
+      "indiaBasket", "usdInr", "h030sg", "grades", "histDates", "histPP",
+      "histBrent", "feedMoves", "baselines", "factors", "polymerupdate",
+    ];
+    keys.forEach((k) => {
+      if (data[k] !== undefined) state[k] = data[k];
+    });
+  }
+
+  function updateDailyPill() {
+    const pill = $("dailyPill");
+    if (!pill) return;
+    const src = state.source === "github-actions-daily" ? "GitHub daily job" : (state.source || "snapshot");
+    const when = state.updatedAt
+      ? new Date(state.updatedAt).toLocaleString()
+      : state.asOf;
+    pill.textContent = `Daily snapshot · ${when} · ${src}`;
+    pill.className = "pill live";
+  }
+
+  async function loadMarketSnapshot() {
+    try {
+      const res = await fetch(MARKET_URL + "?t=" + Date.now(), { cache: "no-store" });
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      const data = await res.json();
+      applySnapshot(data);
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 
   function riskFromMarket() {
@@ -795,6 +833,7 @@
     renderFeed();
     renderProj();
     renderPolymerupdate();
+    updateDailyPill();
   }
 
   async function fetchYahoo(symbol) {
@@ -824,31 +863,29 @@
     btn.disabled = true;
     btn.classList.add("loading");
     st.className = "status";
-    st.textContent = "Refreshing live crude benchmarks and recalculating all charts…";
+    st.textContent = "Reloading daily snapshot and live crude…";
     try {
+      const loaded = await loadMarketSnapshot();
+      updateDailyPill();
+
       const [brent, wti] = await Promise.all([
         fetchYahoo("BZ=F"),
         fetchYahoo("CL=F"),
       ]);
-      const prevBrent = state.brent;
       state.brent = brent.price;
       state.wti = wti.price;
-      // naphtha / propylene / India basket heuristics from Brent move
       state.naphtha = Math.round(state.baselines.naphtha * (1 + (state.brent / state.baselines.brent - 1) * 0.85) * 100) / 100;
       state.propylene = Math.round(state.baselines.propylene * (1 + (state.brent / state.baselines.brent - 1) * 0.55));
       state.indiaBasket = Math.round((state.brent * 1.04 + 2.2) * 100) / 100;
 
-      // update hist last point + date label
       state.histBrent[state.histBrent.length - 1] = state.brent;
       const label = todayLabel();
       state.histDates[state.histDates.length - 1] = label;
 
-      // estimated PP move from crude change vs embedded snapshot
       const estMove = (state.brent - state.baselines.brent) * 0.38;
       state.h030sg = Math.round((state.baselines.h030sg + estMove) * 100) / 100;
       state.histPP[state.histPP.length - 1] = state.h030sg;
 
-      // feedstock heatmap: live 1-mo crude moves + linked estimates
       const brentMo = monthPct(brent.closes, state.feedMoves[0]);
       const wtiMo = monthPct(wti.closes, state.feedMoves[1]);
       const naphMo = Math.round(brentMo * 0.85 * 10) / 10;
@@ -856,10 +893,11 @@
       const indiaMo = Math.round((((state.indiaBasket / state.baselines.indiaBasket) - 1) * 100) * 10) / 10;
       state.feedMoves = [brentMo, wtiMo, naphMo, propMo, indiaMo];
 
-      state.polymerupdate.synced = label + " · crude live";
+      if (state.polymerupdate) {
+        state.polymerupdate.synced = label + " · live overlay on daily snapshot";
+      }
 
       setAsOf(label, true);
-      // refresh every graph + detail panel from updated state
       renderKPIs();
       renderGrades();
       renderFactors();
@@ -868,20 +906,35 @@
       renderFeed();
       renderProj();
       renderPolymerupdate();
+      updateDailyPill();
 
       st.className = "status ok";
-      st.textContent = `Updated ${new Date().toLocaleTimeString()} · Brent $${fmt(state.brent)} (${brentMo > 0 ? "+" : ""}${brentMo}% 1m) · WTI $${fmt(state.wti)} · PP est ₹${fmt(state.h030sg)}. All charts recalculated. Polymerupdate headlines remain last published snapshot.`;
+      st.textContent = `Updated ${new Date().toLocaleTimeString()} · snapshot ${loaded ? "loaded" : "fallback"} · Brent $${fmt(state.brent)} (${brentMo > 0 ? "+" : ""}${brentMo}% 1m) · PP est ₹${fmt(state.h030sg)}. All charts recalculated.`;
     } catch (e) {
       st.className = "status err";
-      st.textContent = "Live feed unavailable (" + (e && e.message ? e.message : "network") + "). Showing last embedded snapshot — try again.";
+      st.textContent = "Live feed unavailable (" + (e && e.message ? e.message : "network") + "). Showing last snapshot — try again.";
+      renderAll();
+      updateDailyPill();
     } finally {
       btn.disabled = false;
       btn.classList.remove("loading");
     }
   }
 
+  async function boot() {
+    const loaded = await loadMarketSnapshot();
+    updateDailyPill();
+    renderAll();
+    $("refreshStatus").className = "status";
+    $("refreshStatus").textContent = loaded
+      ? `Daily snapshot loaded (${state.asOf}). Auto-refreshing live crude…`
+      : "Snapshot file unavailable — using embedded fallback. Click Refresh to try live crude.";
+    // Auto-refresh once on open so GitHub Pages always shows latest live crude on top of daily file
+    await refreshLatest();
+  }
+
   $("refreshBtn").addEventListener("click", refreshLatest);
-  renderAll();
+  boot();
 })();
 </script>
 </body>
