@@ -76,6 +76,16 @@
     "propylene": 1010,
     "indiaBasket": 103.33
   },
+  "bopp": {
+    "asOf": "10 Jul 2026",
+    "basis": "JPFL delivered NTT plain N1/N2 · Mar list after −₹10/kg NTT cut",
+    "note": "JPFL delivered · after 10 Jul cut (Mar list −₹10/kg NTT). Tape textile 25–30µ ~₹178 (−₹4). GST/zonal extra.",
+    "grades": [
+      { "micron": 12, "grade": "NTT plain N1/N2", "px": 201, "move": "−₹10 NTT", "dir": "down" },
+      { "micron": 15, "grade": "NTT plain N1/N2", "px": 193, "move": "−₹10 NTT", "dir": "down" },
+      { "micron": 18, "grade": "NTT plain N1/N2", "px": 183, "move": "−₹10 NTT", "dir": "down" }
+    ]
+  },
   "factors": [
     {
       "name": "Brent / crude",

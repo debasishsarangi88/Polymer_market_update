@@ -17,6 +17,17 @@ python3 -m http.server 8000
 # then visit http://localhost:8000
 ```
 
+## Live site (bookmark this)
+
+**https://debasishsarangi88.github.io/Polymer_market_update/**
+
+Open that URL on your phone and pull-to-refresh anytime. A GitHub Action updates
+crude-linked prices every day around **06:00 IST** and redeploys the same URL —
+you do not need to ask for a republish.
+
+The repository is **public** so GitHub Pages works on the free plan. Anyone with
+the link can view the dashboard (no password).
+
 ## Deploying to GitHub Pages
 
 The workflow in `.github/workflows/deploy.yml` publishes the repository root on

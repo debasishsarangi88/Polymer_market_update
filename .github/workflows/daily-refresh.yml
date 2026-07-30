@@ -1,7 +1,9 @@
 name: Daily market refresh
 
-# Rebuilds data/market.json every day so GitHub Pages serves a fresh snapshot.
-# Runs at 00:30 UTC (~06:00 IST). Also runnable manually from the Actions tab.
+# Rebuilds data/market.json + embedded snapshot every day, then deploys Pages
+# in the SAME job (Actions commits with GITHUB_TOKEN alone do not retrigger
+# other workflows, so deploy must happen here).
+# Schedule: 00:30 UTC (~06:00 IST). Also runnable from the Actions tab.
 on:
   schedule:
     - cron: "30 0 * * *"
@@ -9,14 +11,19 @@ on:
 
 permissions:
   contents: write
+  pages: write
+  id-token: write
 
 concurrency:
   group: daily-market-refresh
   cancel-in-progress: false
 
 jobs:
-  refresh:
+  refresh-and-deploy:
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
 
@@ -27,10 +34,21 @@ jobs:
       - name: Update daily market snapshot
         run: python3 scripts/update_market_daily.py
 
-      - name: Commit and push snapshot
+      - name: Commit snapshot (market.json + index.html embed)
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "chore: daily market snapshot refresh"
-          file_pattern: data/market.json
+          file_pattern: data/market.json index.html
           commit_user_name: github-actions[bot]
           commit_user_email: github-actions[bot]@users.noreply.github.com
+
+      # Redeploy from the just-updated tree so mobile browsers get fresh files
+      # at the same stable Pages URL without a second workflow trigger.
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+
+      - id: deployment
+        uses: actions/deploy-pages@v4

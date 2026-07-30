@@ -125,11 +125,38 @@ def main() -> None:
     updated = apply_updates(market, brent, wti, brent_closes, wti_closes)
     MARKET_FILE.parent.mkdir(parents=True, exist_ok=True)
     MARKET_FILE.write_text(json.dumps(updated, indent=2) + "\n")
+    sync_embedded_market(updated)
     print(
         f"Updated {MARKET_FILE.relative_to(ROOT)} · "
         f"asOf={updated['asOf']} · Brent=${updated['brent']} · "
         f"H030SG=₹{updated['h030sg']}"
     )
+
+
+def sync_embedded_market(market: dict) -> None:
+    """Keep the inlined snapshot inside index.html in sync for mobile/offline loads."""
+    import re
+
+    html_path = ROOT / "index.html"
+    if not html_path.exists():
+        return
+    html = html_path.read_text()
+    block = (
+        '<script type="application/json" id="embedded-market">\n'
+        + json.dumps(market, indent=2)
+        + "\n</script>\n"
+    )
+    if 'id="embedded-market"' not in html:
+        return
+    html, n = re.subn(
+        r'<script type="application/json" id="embedded-market">[\s\S]*?</script>\n?',
+        lambda _m: block,
+        html,
+        count=1,
+    )
+    if n:
+        html_path.write_text(html)
+        print(f"Synced embedded market into {html_path.relative_to(ROOT)}")
 
 
 if __name__ == "__main__":
