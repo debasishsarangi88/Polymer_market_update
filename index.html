@@ -237,6 +237,7 @@
     </div>
     <div class="row" style="margin-top:8px">
       <span class="pill" id="dailyPill">Daily snapshot · loading</span>
+      <span class="pill live" id="lastRefreshedPill">Last refresh · —</span>
       <span class="status" id="refreshStatus">Loading market snapshot…</span>
     </div>
 
@@ -480,33 +481,33 @@
 
 <script type="application/json" id="embedded-market">
 {
-  "asOf": "26 Jul 2026",
-  "updatedAt": "2026-07-26T17:38:19.832393Z",
+  "asOf": "30 Jul 2026",
+  "updatedAt": "2026-07-30T05:58:51.211967Z",
   "source": "github-actions-daily",
-  "brent": 96.78,
-  "wti": 89.31,
-  "naphtha": 808.22,
-  "propylene": 1008,
-  "indiaBasket": 102.85,
+  "brent": 91.13,
+  "wti": 84.8,
+  "naphtha": 768.13,
+  "propylene": 976,
+  "indiaBasket": 96.98,
   "usdInr": 83.6,
-  "h030sg": 139.42,
+  "h030sg": 137.27,
   "grades": [
     {
       "code": "H030SG",
       "use": "PP raffia",
-      "px": 139.42,
+      "px": 137.27,
       "d": 5.0
     },
     {
       "code": "H100EY",
       "use": "TQ / film",
-      "px": 144.2,
+      "px": 143.86,
       "d": 5.0
     },
     {
       "code": "H110MA",
       "use": "Injection",
-      "px": 138.77,
+      "px": 138.43,
       "d": 5.0
     },
     {
@@ -526,26 +527,29 @@
     "16 Jul",
     "22 Jul",
     "26 Jul",
-    "26 Jul 2026"
+    "26 Jul 2026",
+    "30 Jul 2026"
   ],
   "histPP": [
     132.03,
     134.53,
     139.53,
-    139.42
+    139.42,
+    137.27
   ],
   "histBrent": [
     84.2,
     95.5,
     97.08,
-    96.78
+    96.78,
+    91.13
   ],
   "feedMoves": [
-    34.4,
-    29.0,
-    29.2,
-    18.9,
-    -0.5
+    25.0,
+    22.0,
+    21.2,
+    13.8,
+    -6.1
   ],
   "baselines": {
     "h030sg": 139.53,
@@ -587,7 +591,7 @@
     }
   ],
   "polymerupdate": {
-    "synced": "26 Jul 2026 \u00b7 daily Actions refresh (headlines last curated snapshot)",
+    "synced": "30 Jul 2026 \u00b7 daily Actions refresh (headlines last curated snapshot)",
     "top": [
       {
         "when": "26 Jul 09:10",
@@ -712,16 +716,16 @@
 (function () {
   const MARKET_URL = "data/market.json";
   const state = {
-    asOf: "26 Jul 2026",
+    asOf: "30 Jul 2026",
     updatedAt: null,
     source: "embedded-fallback",
-    brent: 97.08,
-    wti: 90.47,
+    brent: 91.13,
+    wti: 84.8,
     naphtha: 810.35,
     propylene: 1010,
     indiaBasket: 103.33,
     usdInr: 83.6,
-    h030sg: 139.53,
+    h030sg: 137.27,
     grades: [
       { code: "H030SG", use: "PP raffia", px: 139.53, d: 5.0 },
       { code: "H100EY", use: "TQ / film", px: 144.22, d: 5.0 },
@@ -772,10 +776,21 @@
 
   const charts = {};
   const $ = (id) => document.getElementById(id);
+  function setText(id, value) {
+    const el = $(id);
+    if (el) el.textContent = value;
+  }
+  function setHtml(id, value) {
+    const el = $(id);
+    if (el) el.innerHTML = value;
+  }
 
   function fmt(n, d = 2) { return Number(n).toFixed(d); }
   function todayLabel() {
     return new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+  }
+  function nowClock() {
+    return new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
   }
 
   function applySnapshot(data) {
@@ -801,8 +816,13 @@
     pill.className = "pill live";
   }
 
+  function markRefreshed(mode) {
+    setText("lastRefreshedPill", `Last refresh · ${nowClock()} · ${mode}`);
+    const pill = $("lastRefreshedPill");
+    if (pill) pill.className = "pill live";
+  }
+
   async function loadMarketSnapshot() {
-    // 1) same-origin / relative file (GitHub Pages)
     try {
       const res = await fetch(MARKET_URL + "?t=" + Date.now(), { cache: "no-store" });
       if (res.ok) {
@@ -811,7 +831,6 @@
       }
     } catch (_) { /* fall through */ }
 
-    // 2) embedded JSON (htmldrop / offline single-file hosts)
     const embedded = document.getElementById("embedded-market");
     if (embedded && embedded.textContent.trim()) {
       try {
@@ -829,28 +848,57 @@
     ]);
   }
 
+  async function fetchText(url) {
+    const res = await fetch(url, { cache: "no-store", mode: "cors" });
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    return res.text();
+  }
+
   async function fetchJson(url) {
     const res = await fetch(url, { cache: "no-store", mode: "cors" });
     if (!res.ok) throw new Error("HTTP " + res.status);
     return res.json();
   }
 
+  function parseYahooPayload(payload) {
+    let json = payload;
+    if (typeof payload === "string") {
+      const start = payload.indexOf('{"chart"');
+      if (start < 0) throw new Error("no chart json");
+      let parsed = null;
+      for (let end = payload.length - 1; end > start; end--) {
+        try {
+          parsed = JSON.parse(payload.slice(start, end + 1));
+          if (parsed && parsed.chart) break;
+        } catch (_) { /* keep trimming */ }
+        parsed = null;
+      }
+      if (!parsed) throw new Error("chart parse failed");
+      json = parsed;
+    }
+    const result = json.chart.result[0];
+    const meta = result.meta;
+    const closes = result.indicators.quote[0].close.filter((x) => x != null);
+    return { price: meta.regularMarketPrice || closes[closes.length - 1], closes };
+  }
+
   async function fetchYahoo(symbol) {
-    const target = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1d&range=1mo`;
+    const yahoo = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1d&range=1mo`;
     const attempts = [
-      () => fetchJson(target), // may work in some environments
-      () => fetchJson(`https://corsproxy.io/?${encodeURIComponent(target)}`),
-      () => fetchJson(`https://api.allorigins.win/get?url=${encodeURIComponent(target)}`).then((j) => JSON.parse(j.contents)),
-      () => fetchJson(`https://api.allorigins.win/raw?url=${encodeURIComponent(target)}`),
+      // jina reader returns Yahoo JSON as text and is usually browser-reachable
+      async () => parseYahooPayload(await fetchText(`https://r.jina.ai/http://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1d&range=1mo`)),
+      async () => parseYahooPayload(await fetchText(`https://r.jina.ai/${yahoo}`)),
+      async () => parseYahooPayload(await fetchJson(yahoo)),
+      async () => parseYahooPayload(await fetchJson(`https://corsproxy.io/?${encodeURIComponent(yahoo)}`)),
+      async () => {
+        const wrap = await fetchJson(`https://api.allorigins.win/get?url=${encodeURIComponent(yahoo)}`);
+        return parseYahooPayload(wrap.contents);
+      },
     ];
     let lastErr;
     for (const attempt of attempts) {
       try {
-        const json = await withTimeout(attempt(), 8000, "Load failed");
-        const result = json.chart.result[0];
-        const meta = result.meta;
-        const closes = result.indicators.quote[0].close.filter((x) => x != null);
-        return { price: meta.regularMarketPrice || closes[closes.length - 1], closes };
+        return await withTimeout(attempt(), 12000, "Load failed");
       } catch (e) {
         lastErr = e;
       }
@@ -859,19 +907,36 @@
   }
 
   function applyLiveCrude(brent, wti) {
-    state.brent = brent.price;
-    state.wti = wti.price;
+    state.brent = Number(brent.price);
+    state.wti = Number(wti.price);
     state.naphtha = Math.round(state.baselines.naphtha * (1 + (state.brent / state.baselines.brent - 1) * 0.85) * 100) / 100;
     state.propylene = Math.round(state.baselines.propylene * (1 + (state.brent / state.baselines.brent - 1) * 0.55));
     state.indiaBasket = Math.round((state.brent * 1.04 + 2.2) * 100) / 100;
 
-    state.histBrent[state.histBrent.length - 1] = state.brent;
     const label = todayLabel();
-    state.histDates[state.histDates.length - 1] = label;
+    if (!state.histDates.length || state.histDates[state.histDates.length - 1] !== label) {
+      state.histDates.push(label);
+      state.histPP.push(state.h030sg);
+      state.histBrent.push(state.brent);
+      if (state.histDates.length > 14) {
+        state.histDates = state.histDates.slice(-14);
+        state.histPP = state.histPP.slice(-14);
+        state.histBrent = state.histBrent.slice(-14);
+      }
+    }
+    state.histBrent[state.histBrent.length - 1] = state.brent;
 
     const estMove = (state.brent - state.baselines.brent) * 0.38;
     state.h030sg = Math.round((state.baselines.h030sg + estMove) * 100) / 100;
     state.histPP[state.histPP.length - 1] = state.h030sg;
+    state.asOf = label;
+    state.updatedAt = new Date().toISOString();
+    state.source = "live-refresh";
+
+    // keep raffia grade in sync so table visibly changes
+    (state.grades || []).forEach((g) => {
+      if (g.code === "H030SG") g.px = state.h030sg;
+    });
 
     const brentMo = monthPct(brent.closes, state.feedMoves[0]);
     const wtiMo = monthPct(wti.closes, state.feedMoves[1]);
@@ -888,30 +953,8 @@
     return { label, brentMo };
   }
 
-  async function refreshLatest() {
-    const btn = $("refreshBtn");
-    const st = $("refreshStatus");
-    btn.disabled = true;
-    btn.classList.add("loading");
-    st.className = "status";
-    st.textContent = "Refreshing snapshot and charts…";
-
-    const snap = await loadMarketSnapshot();
-    let live = null;
-    let liveErr = null;
-    try {
-      const [brent, wti] = await Promise.all([
-        fetchYahoo("BZ=F"),
-        fetchYahoo("CL=F"),
-      ]);
-      live = applyLiveCrude(brent, wti);
-    } catch (e) {
-      liveErr = e && e.message ? e.message : "network";
-    }
-
-    // Always re-render — refresh must not hard-fail when snapshot/embedded data exists
-    const label = live ? live.label : (state.asOf || todayLabel());
-    setAsOf(label, !!live);
+  function renderAllPanels() {
+    setAsOf(state.asOf || todayLabel(), state.source === "live-refresh");
     renderKPIs();
     renderGrades();
     renderFactors();
@@ -921,26 +964,68 @@
     renderProj();
     renderPolymerupdate();
     updateDailyPill();
+  }
 
-    if (live) {
-      st.className = "status ok";
-      st.textContent = `Updated ${new Date().toLocaleTimeString()} · ${snap.via} + live crude · Brent $${fmt(state.brent)} (${live.brentMo >= 0 ? "+" : ""}${live.brentMo}% 1m) · PP est ₹${fmt(state.h030sg)}. All charts recalculated.`;
-    } else {
-      st.className = "status ok";
-      st.textContent = `Updated ${new Date().toLocaleTimeString()} · ${snap.via} · Brent $${fmt(state.brent)} · PP ₹${fmt(state.h030sg)}. Charts refreshed from daily snapshot (live crude blocked: ${liveErr}).`;
+  async function refreshLatest() {
+    const btn = $("refreshBtn");
+    const st = $("refreshStatus");
+    if (!btn || !st) return;
+    if (btn.dataset.busy === "1") return;
+    btn.dataset.busy = "1";
+    btn.disabled = true;
+    btn.classList.add("loading");
+    st.className = "status";
+    st.textContent = "Refreshing snapshot and live crude…";
+
+    let snap = { ok: false, via: "fallback-state" };
+    let live = null;
+    let liveErr = null;
+    try {
+      snap = await loadMarketSnapshot();
+      try {
+        const [brent, wti] = await Promise.all([
+          fetchYahoo("BZ=F"),
+          fetchYahoo("CL=F"),
+        ]);
+        live = applyLiveCrude(brent, wti);
+      } catch (e) {
+        liveErr = (e && e.message) ? e.message : "network";
+      }
+      renderAllPanels();
+      if (live) {
+        st.className = "status ok";
+        st.textContent = `Updated ${nowClock()} · live crude · Brent $${fmt(state.brent)} (${live.brentMo >= 0 ? "+" : ""}${live.brentMo}% 1m) · H030SG ₹${fmt(state.h030sg)}. All charts recalculated.`;
+        markRefreshed("live");
+      } else {
+        st.className = "status ok";
+        st.textContent = `Updated ${nowClock()} · ${snap.via} · Brent $${fmt(state.brent)} · H030SG ₹${fmt(state.h030sg)}. Charts redrawn (live crude unavailable: ${liveErr}).`;
+        markRefreshed(snap.via);
+      }
+    } catch (e) {
+      st.className = "status err";
+      st.textContent = "Refresh error: " + ((e && e.message) ? e.message : "unknown") + ". Try again.";
+      try { renderAllPanels(); } catch (_) { /* ignore */ }
+      markRefreshed("error");
+    } finally {
+      btn.disabled = false;
+      btn.classList.remove("loading");
+      btn.dataset.busy = "0";
     }
-
-    btn.disabled = false;
-    btn.classList.remove("loading");
   }
 
   async function boot() {
-    const snap = await loadMarketSnapshot();
-    updateDailyPill();
-    renderAll();
-    $("refreshStatus").className = "status";
-    $("refreshStatus").textContent = `Snapshot ready (${snap.via}). Running refresh…`;
-    await refreshLatest();
+    try {
+      const snap = await loadMarketSnapshot();
+      updateDailyPill();
+      renderAllPanels();
+      setText("refreshStatus", `Snapshot ready (${snap.via}). Fetching live crude…`);
+      $("refreshStatus").className = "status";
+      await refreshLatest();
+    } catch (e) {
+      setText("refreshStatus", "Boot error: " + ((e && e.message) ? e.message : "unknown"));
+      const st = $("refreshStatus");
+      if (st) st.className = "status err";
+    }
   }
 
 
@@ -1162,33 +1247,33 @@
   function renderProj() {
     const proj = projectPP();
     const rec = recommendation(proj);
-    $("heroPPRef").textContent = `₹${fmt(state.h030sg)}/kg`;
-    $("heroW4").textContent = `₹${fmt(proj[4].base)}/kg`;
-    $("heroBrent").textContent = `$${fmt(state.brent)}/bbl`;
-    $("recPill").textContent = rec.rec;
-    $("recPill").className = "pill " + rec.tone;
-    $("callTitle").textContent = rec.title;
-    $("callBody").innerHTML = rec.body;
-    $("callStance").textContent = rec.rec;
-    $("callStanceSub").textContent = rec.stanceSub;
-    $("callRiskBand").textContent = rec.riskBand;
-    $("callRiskSub").textContent = rec.riskSub;
-    $("callW4").textContent = `₹${fmt(proj[4].base)}`;
-    $("callNext").textContent = rec.next;
-    $("callNextSub").textContent = rec.nextSub;
-    $("projPill").textContent = `W+4 base ₹${fmt(proj[4].base)}`;
-    $("projChips").innerHTML = [
+    setText("heroPPRef", `₹${fmt(state.h030sg)}/kg`);
+    setText("heroW4", `₹${fmt(proj[4].base)}/kg`);
+    setText("heroBrent", `$${fmt(state.brent)}/bbl`);
+    setText("recPill", rec.rec);
+    if ($("recPill")) $("recPill").className = "pill " + rec.tone;
+    setText("callTitle", rec.title);
+    setHtml("callBody", rec.body);
+    setText("callStance", rec.rec);
+    setText("callStanceSub", rec.stanceSub);
+    setText("callRiskBand", rec.riskBand);
+    setText("callRiskSub", rec.riskSub);
+    setText("callW4", `₹${fmt(proj[4].base)}`);
+    setText("callNext", rec.next);
+    setText("callNextSub", rec.nextSub);
+    setText("projPill", `W+4 base ₹${fmt(proj[4].base)}`);
+    setHtml("projChips", [
       `<span class="chip"><b>Now</b> ₹${fmt(state.h030sg)}</span>`,
       `<span class="chip"><b>W+4 base</b> ₹${fmt(proj[4].base)}</span>`,
       `<span class="chip"><b>W+8 bull</b> ₹${fmt(proj[8].bull)}</span>`,
       `<span class="chip"><b>W+8 bear</b> ₹${fmt(proj[8].bear)}</span>`,
       `<span class="chip"><b>β Brent</b> 0.38 ₹/$</span>`,
-    ].join("");
-    $("scenarioBody").innerHTML = `
+    ].join(""));
+    setHtml("scenarioBody", `
       <tr><td class="up">Bull</td><td>Hormuz stays tight · Brent &gt; $100</td><td>₹${fmt(proj[4].bull)}</td><td>₹${fmt(proj[8].bull)}</td></tr>
       <tr><td style="color:var(--warn)">Base</td><td>Current feedstock path persists</td><td>₹${fmt(proj[4].base)}</td><td>₹${fmt(proj[8].base)}</td></tr>
       <tr><td class="down">Bear</td><td>Geo eases · crude mean-reverts</td><td>₹${fmt(proj[4].bear)}</td><td>₹${fmt(proj[8].bear)}</td></tr>
-    `;
+    `);
     if (charts.proj) charts.proj.destroy();
     charts.proj = new Chart($("projChart"), {
       type: "line",
@@ -1254,11 +1339,11 @@
         <div class="ttl"><a class="link" href="${n.href}" target="_blank" rel="noopener">${n.title}</a></div>
         <span class="tag ${n.tag}">${n.tagLabel}</span>
       </div>`).join("");
-    $("puTopNews").innerHTML = newsHtml(pu.top);
-    $("puCityNews").innerHTML = newsHtml(pu.cities);
-    $("puWeekly").innerHTML = pu.weekly.map(w =>
+    setHtml("puTopNews", newsHtml(pu.top || []));
+    setHtml("puCityNews", newsHtml(pu.cities || []));
+    setHtml("puWeekly", (pu.weekly || []).map(w =>
       `<tr><td>${w.name}</td><td>${w.asOf}</td><td class="faint">${w.note}</td></tr>`
-    ).join("");
+    ).join(""));
     const wireNote = document.querySelector("#puTopNews")?.closest(".panel")?.querySelector("p.faint");
     if (wireNote) {
       wireNote.innerHTML = `Headlines &amp; India market signals from <a class="link" href="https://www.polymerupdate.com/" target="_blank" rel="noopener">www.polymerupdate.com</a> (public feed, snapshot ${pu.synced}). Full grade tables on Polymerupdate require login. Live Refresh updates crude-linked panels; Polymerupdate headlines refresh when this dashboard is republished.`;
