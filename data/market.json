@@ -1,31 +1,31 @@
 {
   "asOf": "30 Jul 2026",
-  "updatedAt": "2026-07-30T05:58:51.211967Z",
+  "updatedAt": "2026-07-30T19:06:10.780658Z",
   "source": "github-actions-daily",
-  "brent": 91.13,
-  "wti": 84.8,
-  "naphtha": 768.13,
-  "propylene": 976,
-  "indiaBasket": 96.98,
+  "brent": 88.99,
+  "wti": 83.53,
+  "naphtha": 752.95,
+  "propylene": 964,
+  "indiaBasket": 94.75,
   "usdInr": 83.6,
-  "h030sg": 137.27,
+  "h030sg": 136.46,
   "grades": [
     {
       "code": "H030SG",
       "use": "PP raffia",
-      "px": 137.27,
+      "px": 136.46,
       "d": 5.0
     },
     {
       "code": "H100EY",
       "use": "TQ / film",
-      "px": 143.86,
+      "px": 142.48,
       "d": 5.0
     },
     {
       "code": "H110MA",
       "use": "Injection",
-      "px": 138.43,
+      "px": 137.05,
       "d": 5.0
     },
     {
@@ -53,21 +53,21 @@
     134.53,
     139.53,
     139.42,
-    137.27
+    136.46
   ],
   "histBrent": [
     84.2,
     95.5,
     97.08,
     96.78,
-    91.13
+    88.99
   ],
   "feedMoves": [
-    25.0,
     22.0,
-    21.2,
-    13.8,
-    -6.1
+    20.2,
+    18.7,
+    12.1,
+    -8.3
   ],
   "baselines": {
     "h030sg": 139.53,
