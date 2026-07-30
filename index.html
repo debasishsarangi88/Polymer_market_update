@@ -237,10 +237,63 @@
       .trigger-strip div { border-right: 0; border-bottom: 1px solid var(--line); padding: 0 0 8px; }
       .trigger-strip div:last-child { border-bottom: 0; padding-bottom: 0; }
     }
+
+    /* Client password gate (GitHub Pages has no server-side password) */
+    #gate {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background:
+        radial-gradient(1200px 600px at 10% -10%, rgba(61,214,198,.12), transparent 55%),
+        radial-gradient(900px 500px at 100% 0%, rgba(91,141,239,.10), transparent 50%),
+        var(--bg);
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    #gate.open { display: flex; }
+    body.locked .wrap,
+    body.locked .banner { visibility: hidden; }
+    .gate-card {
+      width: min(420px, 100%);
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 28px 24px;
+    }
+    .gate-card h2 {
+      margin: 0 0 8px;
+      font-size: 1.25rem;
+      letter-spacing: -0.02em;
+    }
+    .gate-card p { margin: 0 0 18px; color: var(--muted); font-size: 0.92rem; line-height: 1.45; }
+    .gate-card input[type="password"] {
+      width: 100%;
+      box-sizing: border-box;
+      background: var(--panel2);
+      border: 1px solid var(--line);
+      color: var(--text);
+      border-radius: 10px;
+      padding: 12px 14px;
+      font-size: 1rem;
+      margin-bottom: 12px;
+    }
+    .gate-card .btn { width: 100%; justify-content: center; }
+    .gate-err { color: var(--danger); font-size: 0.85rem; min-height: 1.2em; margin: 0 0 8px; }
   </style>
 </head>
 <body>
-  <div class="banner">Unlisted · password-gated · self-contained snapshot (works offline on this host)</div>
+  <div id="gate" class="open" aria-modal="true" role="dialog">
+    <form class="gate-card" id="gateForm" autocomplete="current-password">
+      <h2>PP Woven Bag Market</h2>
+      <p>Password-gated daily dashboard. Same link every day — pull to refresh on mobile for the latest crude-linked snapshot.</p>
+      <div class="gate-err" id="gateErr"></div>
+      <input type="password" id="gatePass" placeholder="Password" required />
+      <button class="btn" type="submit">Unlock</button>
+    </form>
+  </div>
+  <div class="banner">Stable URL · password-gated · auto-updates daily ~06:00 IST · pull-to-refresh on mobile</div>
   <div class="wrap">
     <div class="row between">
       <div>
@@ -1496,7 +1549,47 @@
   }
 
   $("refreshBtn").addEventListener("click", refreshLatest);
-  boot();
+
+  // Same password as the old htmldrop share link.
+  const PAGE_PASSWORD = "PPWoven-26Jul";
+  const GATE_KEY = "pp-woven-gate-v1";
+
+  function unlockApp() {
+    document.body.classList.remove("locked");
+    const gate = $("gate");
+    if (gate) gate.classList.remove("open");
+    boot();
+  }
+
+  function setupGate() {
+    const unlocked = sessionStorage.getItem(GATE_KEY) === "1";
+    if (unlocked) {
+      unlockApp();
+      return;
+    }
+    document.body.classList.add("locked");
+    const form = $("gateForm");
+    const input = $("gatePass");
+    const err = $("gateErr");
+    if (!form || !input) {
+      unlockApp();
+      return;
+    }
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      if (input.value === PAGE_PASSWORD) {
+        sessionStorage.setItem(GATE_KEY, "1");
+        if (err) err.textContent = "";
+        unlockApp();
+      } else if (err) {
+        err.textContent = "Wrong password. Try again.";
+        input.select();
+      }
+    });
+    setTimeout(() => input.focus(), 50);
+  }
+
+  setupGate();
 })();
 </script>
 </body>

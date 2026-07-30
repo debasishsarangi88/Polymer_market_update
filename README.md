@@ -21,12 +21,18 @@ python3 -m http.server 8000
 
 **https://debasishsarangi88.github.io/Polymer_market_update/**
 
+Password: `PPWoven-26Jul`
+
 Open that URL on your phone and pull-to-refresh anytime. A GitHub Action updates
-crude-linked prices every day around **06:00 IST** and redeploys the same URL —
+crude-linked prices every day around **06:00 IST** and redeploys the **same URL** —
 you do not need to ask for a republish.
 
-The repository is **public** so GitHub Pages works on the free plan. Anyone with
-the link can view the dashboard (no password).
+> **htmldrop note:** Links like `*.htmldrop.link` are frozen at publish time. The host
+> cannot update an existing subdomain, and its CSP blocks live data fetches. Use the
+> GitHub Pages URL above for daily mobile refresh.
+
+The repository is **public** so GitHub Pages works on the free plan. The page itself
+asks for the password above (client-side gate).
 
 ## Deploying to GitHub Pages
 
