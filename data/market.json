@@ -1,9 +1,9 @@
 {
   "asOf": "30 Jul 2026",
-  "updatedAt": "2026-07-30T19:06:10.780658Z",
+  "updatedAt": "2026-07-30T19:20:50.883287Z",
   "source": "github-actions-daily",
   "brent": 88.99,
-  "wti": 83.53,
+  "wti": 83.55,
   "naphtha": 752.95,
   "propylene": 964,
   "indiaBasket": 94.75,
@@ -19,13 +19,13 @@
     {
       "code": "H100EY",
       "use": "TQ / film",
-      "px": 142.48,
+      "px": 142.02,
       "d": 5.0
     },
     {
       "code": "H110MA",
       "use": "Injection",
-      "px": 137.05,
+      "px": 136.59,
       "d": 5.0
     },
     {
@@ -78,12 +78,30 @@
   },
   "bopp": {
     "asOf": "10 Jul 2026",
-    "basis": "JPFL delivered NTT plain N1/N2 · Mar list after −₹10/kg NTT cut",
-    "note": "JPFL delivered · after 10 Jul cut (Mar list −₹10/kg NTT). Tape textile 25–30µ ~₹178 (−₹4). GST/zonal extra.",
+    "basis": "JPFL delivered NTT plain N1/N2 \u00b7 Mar list after \u2212\u20b910/kg NTT cut",
+    "note": "JPFL delivered \u00b7 after 10 Jul cut (Mar list \u2212\u20b910/kg NTT). Tape textile 25\u201330\u00b5 ~\u20b9178 (\u2212\u20b94). GST/zonal extra.",
     "grades": [
-      { "micron": 12, "grade": "NTT plain N1/N2", "px": 201, "move": "−₹10 NTT", "dir": "down" },
-      { "micron": 15, "grade": "NTT plain N1/N2", "px": 193, "move": "−₹10 NTT", "dir": "down" },
-      { "micron": 18, "grade": "NTT plain N1/N2", "px": 183, "move": "−₹10 NTT", "dir": "down" }
+      {
+        "micron": 12,
+        "grade": "NTT plain N1/N2",
+        "px": 201,
+        "move": "\u2212\u20b910 NTT",
+        "dir": "down"
+      },
+      {
+        "micron": 15,
+        "grade": "NTT plain N1/N2",
+        "px": 193,
+        "move": "\u2212\u20b910 NTT",
+        "dir": "down"
+      },
+      {
+        "micron": 18,
+        "grade": "NTT plain N1/N2",
+        "px": 183,
+        "move": "\u2212\u20b910 NTT",
+        "dir": "down"
+      }
     ]
   },
   "factors": [
