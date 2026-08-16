@@ -1,31 +1,31 @@
 {
-  "asOf": "15 Aug 2026",
-  "updatedAt": "2026-08-15T01:55:20.609856Z",
+  "asOf": "16 Aug 2026",
+  "updatedAt": "2026-08-16T02:04:06.195376Z",
   "source": "github-actions-daily",
-  "brent": 88.59,
+  "brent": 88.52,
   "wti": 82.4,
-  "naphtha": 750.11,
+  "naphtha": 749.62,
   "propylene": 961,
-  "indiaBasket": 94.33,
+  "indiaBasket": 94.26,
   "usdInr": 83.6,
-  "h030sg": 136.3,
+  "h030sg": 136.28,
   "grades": [
     {
       "code": "H030SG",
       "use": "PP raffia",
-      "px": 136.3,
+      "px": 136.28,
       "d": 5.0
     },
     {
       "code": "H100EY",
       "use": "TQ / film",
-      "px": 131.89,
+      "px": 131.4,
       "d": 5.0
     },
     {
       "code": "H110MA",
       "use": "Injection",
-      "px": 126.46,
+      "px": 125.97,
       "d": 5.0
     },
     {
@@ -42,7 +42,6 @@
     }
   ],
   "histDates": [
-    "2 Aug 2026",
     "3 Aug 2026",
     "4 Aug 2026",
     "5 Aug 2026",
@@ -55,10 +54,10 @@
     "12 Aug 2026",
     "13 Aug 2026",
     "14 Aug 2026",
-    "15 Aug 2026"
+    "15 Aug 2026",
+    "16 Aug 2026"
   ],
   "histPP": [
-    136.89,
     136.89,
     134.83,
     132.47,
@@ -71,10 +70,10 @@
     136.69,
     136.07,
     135.75,
-    136.3
+    136.3,
+    136.28
   ],
   "histBrent": [
-    90.12,
     90.12,
     84.71,
     78.5,
@@ -87,14 +86,15 @@
     89.61,
     87.97,
     87.13,
-    88.59
+    88.59,
+    88.52
   ],
   "feedMoves": [
-    4.6,
-    3.9,
-    3.9,
-    2.5,
-    -8.7
+    4.2,
+    3.5,
+    3.6,
+    2.3,
+    -8.8
   ],
   "baselines": {
     "h030sg": 139.53,
@@ -164,7 +164,7 @@
     }
   ],
   "polymerupdate": {
-    "synced": "15 Aug 2026 \u00b7 daily Actions refresh (headlines last curated snapshot)",
+    "synced": "16 Aug 2026 \u00b7 daily Actions refresh (headlines last curated snapshot)",
     "top": [
       {
         "when": "26 Jul 09:10",
