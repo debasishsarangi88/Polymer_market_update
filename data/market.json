@@ -1,6 +1,6 @@
 {
-  "asOf": "10 Oct 2026",
-  "updatedAt": "2026-10-10T06:08:17.723636Z",
+  "asOf": "11 Oct 2026",
+  "updatedAt": "2026-10-11T06:06:01.858596Z",
   "source": "github-actions-daily",
   "brent": 104.72,
   "wti": 91.85,
@@ -19,13 +19,13 @@
     {
       "code": "H100EY",
       "use": "TQ / film",
-      "px": 133.28,
+      "px": 133.72,
       "d": 5.0
     },
     {
       "code": "H110MA",
       "use": "Injection",
-      "px": 127.85,
+      "px": 128.29,
       "d": 5.0
     },
     {
@@ -42,7 +42,6 @@
     }
   ],
   "histDates": [
-    "27 Sep 2026",
     "28 Sep 2026",
     "29 Sep 2026",
     "30 Sep 2026",
@@ -55,10 +54,10 @@
     "7 Oct 2026",
     "8 Oct 2026",
     "9 Oct 2026",
-    "10 Oct 2026"
+    "10 Oct 2026",
+    "11 Oct 2026"
   ],
   "histPP": [
-    139.67,
     140.37,
     140.57,
     139.18,
@@ -71,10 +70,10 @@
     141.24,
     141.68,
     141.82,
+    142.43,
     142.43
   ],
   "histBrent": [
-    97.44,
     99.3,
     99.83,
     96.16,
@@ -87,13 +86,14 @@
     101.59,
     102.73,
     103.11,
+    104.72,
     104.72
   ],
   "feedMoves": [
-    -2.7,
-    -10.4,
-    -2.3,
-    -1.5,
+    0.1,
+    -8.2,
+    0.1,
+    0.1,
     7.5
   ],
   "baselines": {
@@ -164,7 +164,7 @@
     }
   ],
   "polymerupdate": {
-    "synced": "10 Oct 2026 \u00b7 daily Actions refresh (headlines last curated snapshot)",
+    "synced": "11 Oct 2026 \u00b7 daily Actions refresh (headlines last curated snapshot)",
     "top": [
       {
         "when": "26 Jul 09:10",
